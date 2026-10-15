@@ -42,6 +42,7 @@ Object.assign(process.env, {
 
 const githubDelayMs = { alice: 600, dave: 300, erin: 450 }; // others: none
 const uploads = new Map(); // username -> uploaded PNG buffer
+const githubCalls = new Map(); // username -> contribution fetches
 let failUploads = false;
 
 function fakeCalendar() {
@@ -82,6 +83,10 @@ globalThis.fetch = async (input, init = {}) => {
     if (query.includes("viewer")) {
       return json(200, { data: { viewer: { login: "test" } } });
     }
+    githubCalls.set(
+      variables.username,
+      (githubCalls.get(variables.username) ?? 0) + 1,
+    );
     const delay = githubDelayMs[variables.username] ?? 0;
     await new Promise((r) => setTimeout(r, delay));
     return json(200, {
@@ -174,12 +179,19 @@ const expected = (theme, format = "png") => {
     : exportToPNG(renderWithStats(days, options));
 };
 
-async function request(username, theme, format = "png") {
+async function requestWithCache(username, theme, format = "png") {
   const res = await realFetch(
     `${base}/api/graph?username=${username}&theme=${theme}&year=${YEAR}&stats=true&format=${format}`,
   );
   if (!res.ok) throw new Error(`${username}: HTTP ${res.status} ${await res.text()}`);
-  return Buffer.from(await res.arrayBuffer());
+  return {
+    body: Buffer.from(await res.arrayBuffer()),
+    cache: res.headers.get("x-cache"),
+  };
+}
+
+async function request(username, theme, format = "png") {
+  return (await requestWithCache(username, theme, format)).body;
 }
 
 let failures = 0;
@@ -225,6 +237,33 @@ for (const [i, c] of cases.entries()) {
     `${c.username} cached image uses its own theme`,
   );
 }
+
+console.log("\n--- identical requests generate once ---");
+// frank is slow at GitHub, so all of these arrive while the first is still
+// generating. Theme names differ only by case, so they're the same graph.
+githubDelayMs.frank = 400;
+const burst = await Promise.all(
+  ["dark", "Dark", "DARK", "dark", "dark"].map((t) =>
+    requestWithCache("frank", t),
+  ),
+);
+check(
+  githubCalls.get("frank") === 1,
+  `5 concurrent identical requests fetch GitHub once (got ${githubCalls.get("frank")})`,
+);
+check(
+  burst.every((r) => r.body.equals(expected(THEMES.dark))),
+  "every concurrent request gets the same correct image",
+);
+check(
+  burst.filter((r) => r.cache === "MISS").length === 1,
+  `exactly one concurrent request is a MISS (got ${burst.map((r) => r.cache).join(",")})`,
+);
+const repeat = await requestWithCache("frank", "dark");
+check(
+  repeat.cache === "HIT" && githubCalls.get("frank") === 1,
+  "a later identical request is a HIT without fetching GitHub",
+);
 
 console.log("\n--- failed cache upload ---");
 failUploads = true;

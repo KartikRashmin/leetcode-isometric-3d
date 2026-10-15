@@ -92,9 +92,138 @@ function getCacheKey(username, params) {
   // The format is carried by the file extension and left out of the hash, so
   // the PNG and SVG of the same graph share a hash.
   const { format, ...rest } = params;
-  const paramsStr = JSON.stringify({ ...rest, username: normalizedUsername });
+  const paramsStr = JSON.stringify({
+    ...rest,
+    ...themeKeyParams(params),
+    username: normalizedUsername,
+  });
   const hash = Buffer.from(paramsStr).toString("base64").replace(/[/+=]/g, "");
   return `daily/${date}/${normalizedUsername}/${hash}.${format}`;
+}
+
+/**
+ * Theme params as they affect the rendered image, so requests that render the
+ * same theme share a cache key: preset names are case-insensitive and unknown
+ * names fall back to github, color params only matter for a custom theme, and
+ * hex colors are case-insensitive.
+ * @param {Object} params
+ * @returns {Object} theme, colors, bg, border, accent and labelColor
+ */
+function themeKeyParams(params) {
+  const lower = (v) => (v ? v.toLowerCase() : null);
+  if (isCustomTheme(params)) {
+    return {
+      theme: "custom",
+      colors: lower(params.colors),
+      bg: lower(params.bg),
+      border: lower(params.border),
+      accent: lower(params.accent),
+      labelColor: lower(params.labelColor),
+    };
+  }
+  const name = (params.theme || "").toLowerCase();
+  return {
+    theme: Object.hasOwn(AVAILABLE_THEMES, name) ? name : "github",
+    colors: null,
+    bg: null,
+    border: null,
+    accent: null,
+    labelColor: null,
+  };
+}
+
+// Images generated or downloaded recently, so repeat requests skip the
+// Supabase round trip. Keys carry the date, so the cache is cleared when the
+// day changes. Map order is recency order (oldest first).
+const MEMORY_CACHE_MAX_BYTES =
+  Number(process.env.MEMORY_CACHE_MAX_MB || 100) * 1024 * 1024;
+const memoryCache = new Map();
+let memoryCacheBytes = 0;
+let memoryCacheDate = "";
+
+// Requests currently being served (Supabase lookup plus generation), so
+// identical requests that arrive together share one generation instead of
+// each missing the cache and generating their own copy.
+const inFlight = new Map();
+
+function memoryCacheGet(cacheKey) {
+  const buffer = memoryCache.get(cacheKey);
+  if (buffer) {
+    memoryCache.delete(cacheKey);
+    memoryCache.set(cacheKey, buffer);
+  }
+  return buffer ?? null;
+}
+
+function memoryCacheSet(cacheKey, buffer) {
+  const date = cacheKey.split("/")[1];
+  if (date !== memoryCacheDate) {
+    memoryCache.clear();
+    memoryCacheBytes = 0;
+    memoryCacheDate = date;
+  }
+  if (buffer.length > MEMORY_CACHE_MAX_BYTES) return;
+  memoryCacheBytes -= memoryCache.get(cacheKey)?.length ?? 0;
+  memoryCache.delete(cacheKey);
+  memoryCache.set(cacheKey, buffer);
+  memoryCacheBytes += buffer.length;
+  for (const [key, old] of memoryCache) {
+    if (memoryCacheBytes <= MEMORY_CACHE_MAX_BYTES) break;
+    memoryCache.delete(key);
+    memoryCacheBytes -= old.length;
+  }
+}
+
+/**
+ * Get the image for a request, generating it at most once per cache key:
+ * served from memory, then from an identical request already in progress,
+ * then from Supabase Storage, and only then generated and stored.
+ * @param {string} cacheKey
+ * @param {Object} params
+ * @returns {Promise<{buffer: Buffer, cacheHit: boolean, source: string}>}
+ */
+async function getOrCreateImage(cacheKey, params) {
+  const cached = memoryCacheGet(cacheKey);
+  if (cached) return { buffer: cached, cacheHit: true, source: "memory" };
+
+  const pending = inFlight.get(cacheKey);
+  if (pending) {
+    const { buffer } = await pending;
+    return { buffer, cacheHit: true, source: "in-flight request" };
+  }
+
+  const work = (async () => {
+    const stored = await getCachedImage(cacheKey);
+    if (stored) {
+      memoryCacheSet(cacheKey, stored);
+      return { buffer: stored, cacheHit: true, source: "Supabase" };
+    }
+
+    // fetchContributions() throws on persistently incomplete data, so a
+    // returned buffer is always complete data and safe to cache.
+    console.log(`[MISS]  ${params.username} — generating new graph`);
+    const buffer = await generateGraph(params);
+    memoryCacheSet(cacheKey, buffer);
+
+    cacheImage(cacheKey, buffer, params.format)
+      .then(() =>
+        console.log(`[SAVE]  ${params.username} — cached to Supabase`),
+      )
+      .catch((err) =>
+        console.error(
+          `[ERROR] ${params.username} — cache save failed: ${err?.message ?? err}`,
+        ),
+      );
+
+    return { buffer, cacheHit: false, source: "generated" };
+  })();
+
+  inFlight.set(cacheKey, work);
+  try {
+    return await work;
+  } finally {
+    inFlight.delete(cacheKey);
+  }
 }
 
 /**
@@ -224,6 +353,23 @@ function parseQueryParams(search) {
 }
 
 /**
+ * Whether a request asks for a custom theme: theme=custom, or any of the
+ * color params that switch it on.
+ * @param {Object} params
+ * @returns {boolean}
+ */
+function isCustomTheme(params) {
+  const { theme } = params;
+  return Boolean(
+    (theme && theme.toLowerCase() === "custom") ||
+      params.colors ||
+      params.bg ||
+      params.border ||
+      params.accent,
+  );
+}
+
+/**
  * Resolve the theme object for a request. A custom theme (theme=custom, or
  * any color param present) is built from the user's colors; otherwise use a
  * named preset, falling back to github for unknown names.
@@ -232,13 +378,7 @@ function parseQueryParams(search) {
  */
 function resolveTheme(params) {
   const { theme } = params;
-  const isCustom =
-    (theme && theme.toLowerCase() === "custom") ||
-    params.colors ||
-    params.bg ||
-    params.border ||
-    params.accent;
-  if (isCustom) {
+  if (isCustomTheme(params)) {
     return buildCustomTheme({
       colors: params.colors ? params.colors.split(",") : [],
       bg: params.bg,
@@ -409,40 +549,20 @@ async function handleRequest(req, res) {
       // Generate cache key
       const cacheKey = getCacheKey(params.username, params);
 
-      // Check cache
-      const cachedImage = await getCachedImage(cacheKey);
-      if (cachedImage) {
-        console.log(`[HIT]   ${username} — served from cache`);
-        // Track analytics (don't wait)
-        trackAnalytics(params, true).catch((err) =>
-          console.error("Analytics error:", err),
-        );
-        return sendImageResponse(req, res, cachedImage, params.format, true);
+      const { buffer, cacheHit, source } = await getOrCreateImage(
+        cacheKey,
+        params,
+      );
+      if (cacheHit) {
+        console.log(`[HIT]   ${username} — served from ${source}`);
       }
 
-      // Generate new graph. fetchContributions() throws on persistently
-      // incomplete data, so a returned buffer is always complete data.
-      console.log(`[MISS]  ${username} — generating new graph`);
-      const imageBuffer = await generateGraph(params);
-
       // Track analytics (don't wait)
-      trackAnalytics(params, false).catch((err) =>
+      trackAnalytics(params, cacheHit).catch((err) =>
         console.error("Analytics error:", err),
       );
 
-      // Data is validated complete, so it's safe to cache.
-      cacheImage(cacheKey, imageBuffer, params.format)
-        .then(() =>
-          console.log(`[SAVE]  ${params.username} — cached to Supabase`),
-        )
-        .catch((err) =>
-          console.error(
-            `[ERROR] ${params.username} — cache save failed: ${err?.message ?? err}`,
-          ),
-        );
-
-      // Send response
-      return sendImageResponse(req, res, imageBuffer, params.format, false);
+      return sendImageResponse(req, res, buffer, params.format, cacheHit);
     } catch (error) {
       const isNotFound =
         error.message.includes("Could not resolve to a User") ||
