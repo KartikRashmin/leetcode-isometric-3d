@@ -1553,8 +1553,8 @@
       "
     >
       <button
-        id="tabMonthly"
-        onclick="switchPeriod('monthly')"
+        id="tabLifetime"
+        onclick="switchPeriod('lifetime')"
         style="
           padding: 8px 16px;
           border: none;
@@ -1565,11 +1565,11 @@
           color: var(--heading-primary);
         "
       >
-        Monthly
+        Lifetime
       </button>
       <button
-        id="tabLifetime"
-        onclick="switchPeriod('lifetime')"
+        id="tabYearly"
+        onclick="switchPeriod('yearly')"
         style="
           padding: 8px 16px;
           border: none;
@@ -1579,19 +1579,34 @@
           color: var(--text-secondary);
         "
       >
-        Lifetime
+        Yearly
+      </button>
+      <button
+        id="tabMonthly"
+        onclick="switchPeriod('monthly')"
+        style="
+          padding: 8px 16px;
+          border: none;
+          background: none;
+          cursor: pointer;
+          border-bottom: 3px solid transparent;
+          color: var(--text-secondary);
+        "
+      >
+        Monthly
       </button>
     </div>
 
-    <!-- Monthly View (Current Month) -->
-    <div id="viewMonthly">
-      <p>Usage statistics for the current month:</p>
-      <canvas
-        id="monthlyChart"
-        style="max-height: 300px; margin: 20px 0"
-      ></canvas>
+    <!-- Lifetime View -->
+    <div id="viewLifetime">
+      <p>All-time usage statistics since launch:</p>
+      <div style="position: relative; height: 280px; margin: 20px 0 8px">
+        <canvas id="lifetimeChart"></canvas>
+      </div>
+      <div style="position: relative; height: 130px; margin: 0 0 20px">
+        <canvas id="lifetimeUsersChart"></canvas>
+      </div>
       <div
-        id="monthlyStats"
         style="
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1599,50 +1614,6 @@
           margin: 20px 0;
         "
       >
-        <div
-          style="
-            background: var(--bg-secondary);
-            padding: 16px;
-            border-radius: 6px;
-            text-align: center;
-          "
-        >
-          <div
-            style="
-              font-size: 2em;
-              font-weight: bold;
-              color: var(--heading-primary);
-            "
-            id="monthlyTotalRequests"
-          >
-            -
-          </div>
-          <div style="color: var(--text-secondary); margin-top: 4px">
-            Total Requests
-          </div>
-        </div>
-        <div
-          style="
-            background: var(--bg-secondary);
-            padding: 16px;
-            border-radius: 6px;
-            text-align: center;
-          "
-        >
-          <div
-            style="
-              font-size: 2em;
-              font-weight: bold;
-              color: var(--heading-secondary);
-            "
-            id="monthlyNewUsers"
-          >
-            -
-          </div>
-          <div style="color: var(--text-secondary); margin-top: 4px">
-            New Users
-          </div>
-        </div>
         <div
           style="
             background: var(--bg-secondary);
@@ -1653,32 +1624,14 @@
         >
           <div
             style="font-size: 2em; font-weight: bold; color: #8250df"
-            id="monthlyCacheHitRate"
+            id="lifetimeGeneratedRequests"
           >
             -
           </div>
           <div style="color: var(--text-secondary); margin-top: 4px">
-            Cache Hit Rate
+            Generated Requests
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Lifetime View -->
-    <div id="viewLifetime" style="display: none">
-      <p>All-time usage statistics since launch:</p>
-      <canvas
-        id="lifetimeChart"
-        style="max-height: 300px; margin: 20px 0"
-      ></canvas>
-      <div
-        style="
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 16px;
-          margin: 20px 0;
-        "
-      >
         <div
           style="
             background: var(--bg-secondary);
@@ -1688,17 +1641,13 @@
           "
         >
           <div
-            style="
-              font-size: 2em;
-              font-weight: bold;
-              color: var(--heading-primary);
-            "
-            id="lifetimeTotalRequests"
+            style="font-size: 2em; font-weight: bold; color: #bf3989"
+            id="lifetimeCachedRequests"
           >
             -
           </div>
           <div style="color: var(--text-secondary); margin-top: 4px">
-            Total Requests
+            Cached Requests
           </div>
         </div>
         <div
@@ -1732,31 +1681,17 @@
           "
         >
           <div
-            style="font-size: 2em; font-weight: bold; color: #8250df"
+            style="
+              font-size: 2em;
+              font-weight: bold;
+              color: var(--heading-primary);
+            "
             id="lifetimeCacheHitRate"
           >
             -
           </div>
           <div style="color: var(--text-secondary); margin-top: 4px">
             Cache Hit Rate
-          </div>
-        </div>
-        <div
-          style="
-            background: var(--bg-secondary);
-            padding: 16px;
-            border-radius: 6px;
-            text-align: center;
-          "
-        >
-          <div
-            style="font-size: 2em; font-weight: bold; color: #bf3989"
-            id="lifetimeCacheHits"
-          >
-            -
-          </div>
-          <div style="color: var(--text-secondary); margin-top: 4px">
-            Total Cache Hits
           </div>
         </div>
       </div>
@@ -1776,6 +1711,208 @@
           id="lifetimeFirstRequest"
         >
           -
+        </div>
+      </div>
+    </div>
+
+    <!-- Yearly View (rolling 12 months) -->
+    <div id="viewYearly" style="display: none">
+      <p>Usage over the last 12 months:</p>
+      <div style="position: relative; height: 280px; margin: 20px 0 8px">
+        <canvas id="yearlyChart"></canvas>
+      </div>
+      <div style="position: relative; height: 130px; margin: 0 0 20px">
+        <canvas id="yearlyUsersChart"></canvas>
+      </div>
+      <div
+        id="yearlyStats"
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          margin: 20px 0;
+        "
+      >
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="font-size: 2em; font-weight: bold; color: #8250df"
+            id="yearlyGeneratedRequests"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            Generated Requests
+          </div>
+        </div>
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="font-size: 2em; font-weight: bold; color: #bf3989"
+            id="yearlyCachedRequests"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            Cached Requests
+          </div>
+        </div>
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="
+              font-size: 2em;
+              font-weight: bold;
+              color: var(--heading-secondary);
+            "
+            id="yearlyNewUsers"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            New Users
+          </div>
+        </div>
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="
+              font-size: 2em;
+              font-weight: bold;
+              color: var(--heading-primary);
+            "
+            id="yearlyCacheHitRate"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            Cache Hit Rate
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly View (rolling 30 days) -->
+    <div id="viewMonthly" style="display: none">
+      <p>Usage over the last 30 days:</p>
+      <div style="position: relative; height: 280px; margin: 20px 0 8px">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+      <div style="position: relative; height: 130px; margin: 0 0 20px">
+        <canvas id="monthlyUsersChart"></canvas>
+      </div>
+      <div
+        id="monthlyStats"
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          margin: 20px 0;
+        "
+      >
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="font-size: 2em; font-weight: bold; color: #8250df"
+            id="monthlyGeneratedRequests"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            Generated Requests
+          </div>
+        </div>
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="font-size: 2em; font-weight: bold; color: #bf3989"
+            id="monthlyCachedRequests"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            Cached Requests
+          </div>
+        </div>
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="
+              font-size: 2em;
+              font-weight: bold;
+              color: var(--heading-secondary);
+            "
+            id="monthlyNewUsers"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            New Users
+          </div>
+        </div>
+        <div
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+          "
+        >
+          <div
+            style="
+              font-size: 2em;
+              font-weight: bold;
+              color: var(--heading-primary);
+            "
+            id="monthlyCacheHitRate"
+          >
+            -
+          </div>
+          <div style="color: var(--text-secondary); margin-top: 4px">
+            Cache Hit Rate
+          </div>
         </div>
       </div>
     </div>
@@ -1842,6 +1979,27 @@
         document.documentElement.setAttribute("data-theme", newTheme);
         localStorage.setItem("theme", newTheme);
         updateThemeButton(newTheme);
+        restyleCharts();
+      }
+
+      // Recolor the chart chrome (text, grid, tooltip) for the current theme.
+      function restyleCharts() {
+        const ink = chartInk();
+        const tip = baseChartOptions(ink).plugins.tooltip;
+        Object.values(Chart.instances).forEach((chart) => {
+          const { plugins, scales } = chart.options;
+          plugins.legend.labels.color = ink.text;
+          Object.assign(plugins.tooltip, {
+            backgroundColor: tip.backgroundColor,
+            titleColor: tip.titleColor,
+            bodyColor: tip.bodyColor,
+            borderColor: tip.borderColor,
+          });
+          scales.x.ticks.color = ink.text;
+          scales.y.ticks.color = ink.text;
+          scales.y.grid.color = ink.grid;
+          chart.update("none");
+        });
       }
 
       function updateThemeButton(theme) {
@@ -1856,87 +2014,7 @@
       // Initialize theme on load
       initTheme();
 
-      let currentPeriod = "monthly";
-
-      // Chart configuration for modern minimal look
-      const chartConfig = {
-        responsive: true,
-        maintainAspectRatio: true,
-        interaction: {
-          intersect: false,
-          mode: "index",
-        },
-        plugins: {
-          legend: {
-            display: true,
-            position: "top",
-            labels: {
-              padding: 20,
-              font: {
-                size: 13,
-                family:
-                  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                weight: "600",
-              },
-              usePointStyle: true,
-              pointStyle: "circle",
-            },
-          },
-          tooltip: {
-            backgroundColor: "rgba(36, 41, 47, 0.95)",
-            padding: 12,
-            cornerRadius: 8,
-            titleFont: {
-              size: 14,
-              weight: "600",
-            },
-            bodyFont: {
-              size: 13,
-            },
-            borderColor: "rgba(208, 215, 222, 0.3)",
-            borderWidth: 1,
-            callbacks: {
-              label: (ctx) =>
-                ` ${ctx.dataset.label}: ${Math.round(ctx.parsed.y)}`,
-            },
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: "rgba(208, 215, 222, 0.3)",
-              drawBorder: false,
-            },
-            ticks: {
-              precision: 0,
-              font: {
-                size: 12,
-              },
-              color: "#586069",
-            },
-          },
-          x: {
-            grid: {
-              display: false,
-              drawBorder: false,
-            },
-            ticks: {
-              font: {
-                size: 12,
-              },
-              color: "#586069",
-              maxRotation: 0,
-              autoSkip: true,
-              maxTicksLimit: 15,
-            },
-          },
-        },
-        animation: {
-          duration: 1000,
-          easing: "easeInOutQuart",
-        },
-      };
+      let currentPeriod = "lifetime";
 
       // Toggle URL Builder visibility
       function toggleBuilder() {
@@ -2144,9 +2222,9 @@
           .trim();
 
         // Update all tabs
-        const tabs = ["tabMonthly", "tabLifetime"];
-        const views = ["viewMonthly", "viewLifetime"];
-        const periods = ["monthly", "lifetime"];
+        const tabs = ["tabLifetime", "tabYearly", "tabMonthly"];
+        const views = ["viewLifetime", "viewYearly", "viewMonthly"];
+        const periods = ["lifetime", "yearly", "monthly"];
 
         periods.forEach((p, i) => {
           document.getElementById(tabs[i]).style.borderBottomColor =
@@ -2287,6 +2365,521 @@
         }
       }
 
+      // Chart chrome follows the page theme. Read at draw time, so charts
+      // created after a theme switch pick up the current colors.
+      function chartInk() {
+        const dark =
+          document.documentElement.getAttribute("data-theme") === "dark";
+        return {
+          dark,
+          text: dark ? "#a0a0a0" : "#586069",
+          grid: dark ? "rgba(255, 255, 255, 0.07)" : "rgba(31, 35, 40, 0.07)",
+          band: dark ? "rgba(255, 255, 255, 0.06)" : "rgba(31, 35, 40, 0.05)",
+        };
+      }
+
+      function baseChartOptions(ink, tooltipTitle) {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          // Draw at 2x or more so curves are anti-aliased on 1x screens too.
+          devicePixelRatio: Math.max(2, window.devicePixelRatio || 1),
+          interaction: { intersect: false, mode: "index" },
+          animation: { duration: 700, easing: "easeOutCubic" },
+          // Hover dots and highlights appear instantly; animating them leaves
+          // a trail of shrinking dots as the pointer moves.
+          transitions: { active: { animation: { duration: 0 } } },
+          layout: { padding: { top: 4, right: 4 } },
+          plugins: {
+            legend: {
+              display: true,
+              position: "top",
+              align: "start",
+              labels: {
+                color: ink.text,
+                boxWidth: 18,
+                boxHeight: 2,
+                padding: 16,
+                font: { size: 12, weight: "600" },
+              },
+            },
+            tooltip: {
+              backgroundColor: ink.dark ? "#1a1a1a" : "#ffffff",
+              titleColor: ink.dark ? "#e6e6e6" : "#24292f",
+              bodyColor: ink.dark ? "#e6e6e6" : "#24292f",
+              borderColor: ink.dark ? "#2a2a2a" : "#d0d7de",
+              borderWidth: 1,
+              padding: { x: 8, y: 6 },
+              cornerRadius: 6,
+              // Keep the tooltip clear of the hovered point so it stays visible.
+              caretPadding: 14,
+              boxWidth: 10,
+              boxHeight: 2,
+              boxPadding: 4,
+              usePointStyle: false,
+              titleFont: { size: 11, weight: "600" },
+              titleMarginBottom: 4,
+              bodyFont: { size: 11 },
+              bodySpacing: 1,
+              callbacks: {
+                title: tooltipTitle,
+                label: (ctx) =>
+                  ` ${Math.round(ctx.parsed.y).toLocaleString()}  ${ctx.dataset.label}`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { display: false },
+              ticks: {
+                color: ink.text,
+                font: { size: 11 },
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 8,
+              },
+            },
+            y: {
+              beginAtZero: true,
+              // Headroom above the highest value so peaks don't touch the top.
+              grace: "5%",
+              border: { display: false },
+              grid: { color: ink.grid, drawTicks: false },
+              ticks: {
+                color: ink.text,
+                font: { size: 11 },
+                padding: 8,
+                precision: 0,
+                maxTicksLimit: 5,
+              },
+            },
+          },
+        };
+      }
+
+      // Requests come in two types: generated requests render a new graph,
+      // cached requests are answered with one already rendered that day.
+      // Both are filled spline areas, generated drawn over cached.
+      const GENERATED_COLOR = "#8250df";
+      const CACHED_COLOR = "#bf3989";
+
+      function requestDatasets(generated, cached) {
+        // Fill under a line that fades from the series color to nothing.
+        const areaFill = (rgb) => (context) => {
+          const { chartArea, ctx } = context.chart;
+          if (!chartArea) return `rgba(${rgb}, 0.15)`;
+          const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          g.addColorStop(0, `rgba(${rgb}, 0.35)`);
+          g.addColorStop(1, `rgba(${rgb}, 0.03)`);
+          return g;
+        };
+        const spline = {
+          cubicInterpolationMode: "monotone",
+          spanGaps: true,
+          borderWidth: 2.5,
+          borderCapStyle: "round",
+          borderJoinStyle: "round",
+          pointRadius: 0,
+          pointHitRadius: 12,
+          pointHoverRadius: 5,
+          pointHoverBorderWidth: 2,
+          pointHoverBorderColor: "#ffffff",
+        };
+        return [
+          {
+            ...spline,
+            label: "Generated Requests",
+            data: generated,
+            borderColor: GENERATED_COLOR,
+            backgroundColor: areaFill("130, 80, 223"),
+            pointHoverBackgroundColor: GENERATED_COLOR,
+            fill: "origin",
+            order: 0,
+          },
+          {
+            ...spline,
+            label: "Cached Requests",
+            data: cached,
+            borderColor: CACHED_COLOR,
+            backgroundColor: areaFill("191, 57, 137"),
+            pointHoverBackgroundColor: CACHED_COLOR,
+            fill: "origin",
+            order: 1,
+          },
+        ];
+      }
+
+      // Hover in the requests charts picks the day under the pointer and
+      // returns that day's dot from each series (datasets 0 and 1).
+      Chart.Interaction.modes.day = (chart, e) => {
+        const i = Math.round(chart.scales.x.getValueForPixel(e.x));
+        return [0, 1]
+          .map((datasetIndex) => ({
+            datasetIndex,
+            index: i,
+            element: chart.getDatasetMeta(datasetIndex).data[i],
+          }))
+          .filter((item) => item.element);
+      };
+
+      // Request steps with rounded corners: each step of stepDays days is
+      // flat, and the line eases into the next step near the boundary. The
+      // line is drawn from SAMPLES points per day, so even one-day steps are
+      // flat across the day. Hovering a day shades its step, puts a dot on
+      // each line and shows that day's counts.
+      // days: [{ date, generated, cached }] oldest first; counts are null on
+      // days with nothing recorded, which are left out of the averages.
+      function createRequestsChart(canvas, days, dateLabel, stepDays) {
+        // Each step is that stretch's average per day. Steps line up with the
+        // new users bars.
+        const STEP_DAYS = stepDays;
+        const series = [
+          { key: "cached", label: "Cached Requests" },
+          { key: "generated", label: "Generated Requests" },
+        ];
+
+        // Consecutive stretches of `size` days, with each series' average.
+        const periodsOf = (size) => {
+          const periods = [];
+          days.forEach((day, i) => {
+            if (i % size === 0) periods.push({ start: i, days: [] });
+            periods[periods.length - 1].days.push(day);
+          });
+          periods.forEach((period) => {
+            const recorded = period.days.filter((d) => d.cached !== null);
+            series.forEach(({ key }) => {
+              const sum = recorded.reduce((acc, d) => acc + d[key], 0);
+              period[key] = recorded.length === 0 ? null : sum / recorded.length;
+            });
+          });
+          return periods;
+        };
+        const steps = periodsOf(STEP_DAYS);
+
+        // Day i spans i - 0.5 to i + 0.5 on the x axis. Each step is flat,
+        // and the line eases into the next one over the ROUNDING days either
+        // side of the boundary. SAMPLES (odd, so one sample sits on each
+        // day's center) is how many points per day draw the line.
+        const ROUNDING = Math.min(2, STEP_DAYS * 0.3);
+        const SAMPLES = STEP_DAYS >= 7 ? 1 : 9;
+        const ease = (u) => (1 - Math.cos((Math.PI * (u + 1)) / 2)) / 2;
+        const xs = days.flatMap((_, i) =>
+          Array.from({ length: SAMPLES }, (_, k) => i - 0.5 + (k + 0.5) / SAMPLES),
+        );
+        const valueAt = (key, x) => {
+          const w = Math.min(Math.max(Math.floor((x + 0.5) / STEP_DAYS), 0), steps.length - 1);
+          const period = steps[w];
+          const toNext = period.start + period.days.length - 0.5 - x;
+          const fromPrev = x - (period.start - 0.5);
+          let left = w;
+          let u = null;
+          if (toNext < ROUNDING && steps[w + 1]) u = -toNext / ROUNDING;
+          else if (fromPrev < ROUNDING && steps[w - 1]) [left, u] = [w - 1, fromPrev / ROUNDING];
+          const a = steps[left][key];
+          const b = u === null ? null : steps[left + 1][key];
+          if (u === null || a === null || b === null) return period[key];
+          return a + (b - a) * ease(u);
+        };
+        // The line as { x, y } points. Stretches with nothing recorded are
+        // bridged with a straight line.
+        const line = (key) => {
+          const values = xs.map((x) => valueAt(key, x));
+          return values.map((v, i) => {
+            if (v === null) {
+              let before = i;
+              while (before >= 0 && values[before] === null) before--;
+              let after = i;
+              while (after < values.length && values[after] === null) after++;
+              if (before >= 0 && after < values.length) {
+                v = values[before] + ((values[after] - values[before]) * (i - before)) / (after - before);
+              }
+            }
+            return { x: xs[i], y: v };
+          });
+        };
+        // The hover dot for each day, on the line at the day's center.
+        const dots = (points) =>
+          days.map((_, i) => points[i * SAMPLES + (SAMPLES - 1) / 2]);
+
+        const ink = chartInk();
+        const options = baseChartOptions(ink);
+        const { tooltip } = options.plugins;
+        tooltip.boxHeight = 10;
+        // Open beside the hovered day, never above or below it, so it can't
+        // cover the dots.
+        tooltip.yAlign = "center";
+        tooltip.footerColor = ink.text;
+        tooltip.footerFont = { size: 11, weight: "normal" };
+        tooltip.footerMarginTop = 4;
+        // Legend in dataset order (cached, generated), and only the dots'
+        // datasets, which carry the series names.
+        options.plugins.legend.labels.sort = (a, b) => a.datasetIndex - b.datasetIndex;
+        options.plugins.legend.labels.filter = (item) => item.datasetIndex < 2;
+        options.interaction = { mode: "day", intersect: false };
+        const keyOf = (ctx) => series[ctx.datasetIndex].key;
+        // One "no data" line on a day with nothing recorded.
+        tooltip.filter = (item) =>
+          item.datasetIndex < 2 &&
+          (days[item.dataIndex].cached !== null || item.datasetIndex === 0);
+        tooltip.itemSort = (a, b) => a.datasetIndex - b.datasetIndex;
+        tooltip.callbacks = {
+          labelColor: (ctx) => ({
+            borderColor: ctx.dataset.borderColor,
+            backgroundColor: ctx.dataset.borderColor,
+          }),
+          title: (items) =>
+            new Date(days[items[0].dataIndex].date).toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              timeZone: "UTC",
+            }),
+          label: (ctx) => {
+            const day = days[ctx.dataIndex];
+            if (day.cached === null) return " No data recorded";
+            return ` ${day[keyOf(ctx)].toLocaleString()}  ${ctx.dataset.label}`;
+          },
+          footer: (items) => {
+            const i = items[0].dataIndex;
+            const step = steps[Math.floor(i / STEP_DAYS)];
+            if (STEP_DAYS === 1 || step.cached === null) return [];
+            return `Week avg: ${Math.round(step.cached)} cached, ${Math.round(step.generated)} generated / day`;
+          },
+        };
+        options.scales.x = {
+          ...options.scales.x,
+          type: "linear",
+          min: -0.5,
+          max: days.length - 0.5,
+          // Ticks on step starts, about eight across the axis.
+          afterBuildTicks: (axis) => {
+            const every = STEP_DAYS * Math.max(1, Math.ceil(days.length / (8 * STEP_DAYS)));
+            axis.ticks = days
+              .map((_, i) => i)
+              .filter((i) => i % every === 0)
+              .map((value) => ({ value }));
+          },
+          ticks: {
+            ...options.scales.x.ticks,
+            callback: (value) => (days[value] ? dateLabel(days[value].date) : ""),
+          },
+        };
+
+        // Shade the week of the hovered day.
+        const weekBand = {
+          id: "weekBand",
+          beforeDatasetsDraw(chart) {
+            const active = chart.getActiveElements();
+            if (active.length === 0) return;
+            const start = Math.floor(active[0].index / STEP_DAYS) * STEP_DAYS;
+            const end = Math.min(start + STEP_DAYS, days.length) - 1;
+            const x = chart.scales.x;
+            const half = (x.getPixelForValue(1) - x.getPixelForValue(0)) / 2;
+            const { ctx, chartArea } = chart;
+            ctx.save();
+            ctx.fillStyle = chartInk().band;
+            ctx.fillRect(
+              x.getPixelForValue(start) - half,
+              chartArea.top,
+              x.getPixelForValue(end) - x.getPixelForValue(start) + 2 * half,
+              chartArea.bottom - chartArea.top,
+            );
+            ctx.restore();
+          },
+        };
+
+        // Datasets 0 and 1 are the hover dots (one per day, no line); 2 and
+        // 3 draw the lines from the samples.
+        const lines = { cached: line("cached"), generated: line("generated") };
+        const [generated, cached] = requestDatasets(lines.generated, lines.cached);
+        const dotsOf = (dataset, key) => ({
+          ...dataset,
+          data: dots(lines[key]),
+          showLine: false,
+          fill: false,
+          pointHitRadius: 0,
+        });
+        const drawn = (dataset) => ({
+          ...dataset,
+          pointHoverRadius: 0,
+          pointHitRadius: 0,
+        });
+        return new Chart(canvas.getContext("2d"), {
+          type: "line",
+          data: {
+            datasets: [
+              dotsOf(cached, "cached"),
+              dotsOf(generated, "generated"),
+              drawn(cached),
+              drawn(generated),
+            ],
+          },
+          options,
+          plugins: [weekBand],
+        });
+      }
+
+      // New users is a different unit from requests, so it gets its own small
+      // chart instead of a second y axis on the requests chart.
+      function createNewUsersChart(canvas, labels, values, tooltipTitle) {
+        const ink = chartInk();
+        const options = baseChartOptions(ink, tooltipTitle);
+        options.plugins.legend.labels.boxHeight = 10;
+        options.plugins.tooltip.boxHeight = 10;
+        options.scales.y.ticks.maxTicksLimit = 3;
+
+        // Shade the hovered bar's whole column, like the week band on the
+        // requests chart.
+        const columnBand = {
+          id: "columnBand",
+          beforeDatasetsDraw(chart) {
+            const active = chart.getActiveElements();
+            if (active.length === 0) return;
+            const x = chart.scales.x;
+            const width = x.width / chart.data.labels.length;
+            const { ctx, chartArea } = chart;
+            ctx.save();
+            ctx.fillStyle = chartInk().band;
+            ctx.fillRect(
+              x.getPixelForValue(active[0].index) - width / 2,
+              chartArea.top,
+              width,
+              chartArea.bottom - chartArea.top,
+            );
+            ctx.restore();
+          },
+        };
+
+        return new Chart(canvas.getContext("2d"), {
+          plugins: [columnBand],
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "New Users",
+                data: values,
+                backgroundColor: "rgba(26, 127, 55, 0.85)",
+                hoverBackgroundColor: "#1a7f37",
+                borderColor: "#1a7f37",
+                borderWidth: 0,
+                borderRadius: { topLeft: 4, topRight: 4 },
+                borderSkipped: "bottom",
+                categoryPercentage: 0.8,
+                barPercentage: 0.9,
+                maxBarThickness: 24,
+              },
+            ],
+          },
+          options,
+        });
+      }
+
+      // Hovering a step in either chart highlights the same step in the other:
+      // a day in the requests chart lights up that step's new users bar, and
+      // a bar lights up the middle of that step in the requests chart.
+      function linkWeekHover(requestsChart, usersChart, stepDays) {
+        const show = (chart, items) => {
+          const active = items.filter(
+            ({ datasetIndex, index }) =>
+              chart.getDatasetMeta(datasetIndex).data[index],
+          );
+          const el = active[0] && chart.getDatasetMeta(active[0].datasetIndex).data[active[0].index];
+          chart.setActiveElements(active);
+          chart.tooltip.setActiveElements(active, el ? { x: el.x, y: el.y } : { x: 0, y: 0 });
+          chart.update("none");
+        };
+        const clear = (chart) => show(chart, []);
+        const lastDay = requestsChart.data.datasets[0].data.length - 1;
+
+        requestsChart.options.onHover = (e, active) => {
+          if (active.length === 0) return clear(usersChart);
+          show(usersChart, [{ datasetIndex: 0, index: Math.floor(active[0].index / stepDays) }]);
+        };
+        usersChart.options.onHover = (e, active) => {
+          if (active.length === 0) return clear(requestsChart);
+          const day = Math.min(active[0].index * stepDays + Math.floor(stepDays / 2), lastDay);
+          show(requestsChart, [0, 1].map((datasetIndex) => ({ datasetIndex, index: day })));
+        };
+        requestsChart.canvas.addEventListener("mouseleave", () => clear(usersChart));
+        usersChart.canvas.addEventListener("mouseleave", () => clear(requestsChart));
+      }
+
+      // The requests chart and new users bars for one tab, stepping every
+      // stepDays days (7 for weeks, 1 for single days). A day with no
+      // requests at all means nothing was recorded (the service or its
+      // analytics was down), not that nobody used it.
+      function renderPeriodCharts(prefix, rows, newUsersByDate, stepDays) {
+        if (rows.length === 0) return;
+        const label = (date) =>
+          new Date(date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            timeZone: "UTC",
+          });
+        const requestsChart = createRequestsChart(
+          document.getElementById(`${prefix}Chart`),
+          rows.map((day) => {
+            const total = parseInt(day.total_requests || 0);
+            const cached = parseInt(day.cache_hits || 0);
+            return {
+              date: day.date,
+              generated: total > 0 ? total - cached : null,
+              cached: total > 0 ? cached : null,
+            };
+          }),
+          label,
+          stepDays,
+        );
+
+        const steps = [];
+        rows.forEach((day, i) => {
+          if (i % stepDays === 0) steps.push({ label: label(day.date), newUsers: 0 });
+          steps[steps.length - 1].newUsers += newUsersByDate[day.date] || 0;
+        });
+        const usersChart = createNewUsersChart(
+          document.getElementById(`${prefix}UsersChart`),
+          steps.map((step) => step.label),
+          steps.map((step) => step.newUsers),
+          stepDays === 7 ? (items) => `Week of ${items[0].label}` : undefined,
+        );
+        linkWeekHover(requestsChart, usersChart, stepDays);
+      }
+
+      // Totals for a rolling window's stat cards.
+      function fillPeriodCards(prefix, rows, newUsersByDate) {
+        const sum = (value) => rows.reduce((total, day) => total + value(day), 0);
+        const requests = sum((day) => parseInt(day.total_requests || 0));
+        const cached = sum((day) => parseInt(day.cache_hits || 0));
+        const newUsers = sum((day) => newUsersByDate[day.date] || 0);
+        const set = (id, text) => (document.getElementById(prefix + id).textContent = text);
+        set("GeneratedRequests", (requests - cached).toLocaleString());
+        set("CachedRequests", cached.toLocaleString());
+        set("NewUsers", newUsers.toLocaleString());
+        set(
+          "CacheHitRate",
+          (requests > 0 ? ((cached / requests) * 100).toFixed(1) : "0") + "%",
+        );
+      }
+
+      // Daily rows sorted oldest first, with a zero row for every day between
+      // the first and last row that has no requests.
+      function fillMissingDays(rows) {
+        if (rows.length === 0) return [];
+        const byDate = new Map(rows.map((row) => [row.date, row]));
+        const dates = [...byDate.keys()].sort();
+        const filled = [];
+        const end = new Date(dates[dates.length - 1]);
+        for (let d = new Date(dates[0]); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+          const date = d.toISOString().slice(0, 10);
+          filled.push(
+            byDate.get(date) ?? { date, total_requests: 0, cache_hits: 0 },
+          );
+        }
+        return filled;
+      }
+
       async function loadAnalytics() {
         try {
           const response = await fetch("/api/analytics");
@@ -2296,175 +2889,41 @@
           }
 
           const data = await response.json();
-          console.log("Analytics API Response:", data);
-          const stats = data.daily_stats || [];
           const lifetime = data.lifetime_stats;
-          console.log("Daily stats count:", stats.length);
-          console.log("Lifetime stats:", lifetime);
 
-          // Update Monthly (current month) stats and chart
-          {
-            // Dates from the API are "YYYY-MM-DD" strings, which parse as UTC
-            // midnight. Use UTC accessors throughout so timezone offset can't
-            // shift a date into the wrong month.
-            const now = new Date();
-            const currentYear = now.getUTCFullYear();
-            const currentMonth = now.getUTCMonth();
-            const currentMonthStats = stats.filter((day) => {
-              const d = new Date(day.date);
-              return (
-                d.getUTCFullYear() === currentYear &&
-                d.getUTCMonth() === currentMonth
-              );
-            });
+          // One row per day since launch. Rows only exist for days with
+          // requests, so missing days are filled with zeros; otherwise they
+          // vanish from the x axis. Today is left out because its count is
+          // still partial.
+          const today = new Date().toISOString().slice(0, 10);
+          const allDays = fillMissingDays(
+            data.daily_stats_lifetime || data.daily_stats || [],
+          ).filter((day) => day.date < today);
+          const newUsersByDate = {};
+          (data.daily_new_users || []).forEach((d) => {
+            newUsersByDate[d.date] = parseInt(d.new_users || 0);
+          });
+          // The last `days` days, ending yesterday.
+          const lastDays = (days) => {
+            const from = new Date(`${today}T00:00:00Z`);
+            from.setUTCDate(from.getUTCDate() - days);
+            const start = from.toISOString().slice(0, 10);
+            return allDays.filter((day) => day.date >= start);
+          };
 
-            // Build lookup for daily new users
-            const dailyNewUsersMap = {};
-            (data.daily_new_users || []).forEach((d) => {
-              dailyNewUsersMap[d.date] = parseInt(d.new_users || 0);
-            });
-
-            const monthlyTotalReqs = currentMonthStats.reduce(
-              (sum, day) => sum + parseInt(day.total_requests || 0),
-              0,
-            );
-            const monthlyTotalCacheHits = currentMonthStats.reduce(
-              (sum, day) => sum + parseInt(day.cache_hits || 0),
-              0,
-            );
-            const monthlyNewUsersCount = currentMonthStats.reduce(
-              (sum, day) => sum + (dailyNewUsersMap[day.date] || 0),
-              0,
-            );
-            const monthlyCacheRate =
-              monthlyTotalReqs > 0
-                ? ((monthlyTotalCacheHits / monthlyTotalReqs) * 100).toFixed(1)
-                : 0;
-
-            document.getElementById("monthlyTotalRequests").textContent =
-              monthlyTotalReqs.toLocaleString();
-            document.getElementById("monthlyNewUsers").textContent =
-              monthlyNewUsersCount.toLocaleString();
-            document.getElementById("monthlyCacheHitRate").textContent =
-              monthlyCacheRate + "%";
-
-            // Chart: daily breakdown for current month
-            const chartData = [...currentMonthStats].reverse();
-            if (chartData.length > 0) {
-              const labels = chartData.map((day) =>
-                new Date(day.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                }),
-              );
-              const requestData = chartData.map((day) =>
-                parseInt(day.total_requests || 0),
-              );
-              const cacheHitData = chartData.map((day) =>
-                parseInt(day.cache_hits || 0),
-              );
-              const newUserData = chartData.map(
-                (day) => dailyNewUsersMap[day.date] || 0,
-              );
-
-              const monthlyCtx = document
-                .getElementById("monthlyChart")
-                .getContext("2d");
-
-              const gradientBlueM = monthlyCtx.createLinearGradient(
-                0,
-                0,
-                0,
-                300,
-              );
-              gradientBlueM.addColorStop(0, "rgba(9, 105, 218, 0.2)");
-              gradientBlueM.addColorStop(1, "rgba(9, 105, 218, 0.01)");
-
-              const gradientGreenM = monthlyCtx.createLinearGradient(
-                0,
-                0,
-                0,
-                300,
-              );
-              gradientGreenM.addColorStop(0, "rgba(26, 127, 55, 0.2)");
-              gradientGreenM.addColorStop(1, "rgba(26, 127, 55, 0.01)");
-
-              const gradientPurpleM = monthlyCtx.createLinearGradient(
-                0,
-                0,
-                0,
-                300,
-              );
-              gradientPurpleM.addColorStop(0, "rgba(130, 80, 223, 0.2)");
-              gradientPurpleM.addColorStop(1, "rgba(130, 80, 223, 0.01)");
-
-              new Chart(monthlyCtx, {
-                type: "line",
-                data: {
-                  labels: labels,
-                  datasets: [
-                    {
-                      label: "Total Requests",
-                      data: requestData,
-                      borderColor: "#0969da",
-                      backgroundColor: gradientBlueM,
-                      borderWidth: 2.5,
-                      tension: 0.4,
-                      fill: true,
-                      pointRadius: 0,
-                      pointHoverRadius: 6,
-                      pointHoverBackgroundColor: "#0969da",
-                      pointHoverBorderColor: "#fff",
-                      pointHoverBorderWidth: 2,
-                    },
-                    {
-                      label: "Cache Hits",
-                      data: cacheHitData,
-                      borderColor: "#1a7f37",
-                      backgroundColor: gradientGreenM,
-                      borderWidth: 2.5,
-                      tension: 0.4,
-                      fill: true,
-                      pointRadius: 0,
-                      pointHoverRadius: 6,
-                      pointHoverBackgroundColor: "#1a7f37",
-                      pointHoverBorderColor: "#fff",
-                      pointHoverBorderWidth: 2,
-                    },
-                    {
-                      label: "New Users",
-                      data: newUserData,
-                      borderColor: "#8250df",
-                      backgroundColor: gradientPurpleM,
-                      borderWidth: 2.5,
-                      tension: 0.4,
-                      fill: true,
-                      pointRadius: 0,
-                      pointHoverRadius: 6,
-                      pointHoverBackgroundColor: "#8250df",
-                      pointHoverBorderColor: "#fff",
-                      pointHoverBorderWidth: 2,
-                    },
-                  ],
-                },
-                options: chartConfig,
-              });
-            }
-          }
-
-          // Update lifetime stats and chart
+          // Lifetime: totals since launch, weekly steps.
           if (lifetime) {
-            document.getElementById("lifetimeTotalRequests").textContent = (
-              parseInt(lifetime.total_requests) || 0
+            const lifetimeCached = parseInt(lifetime.total_cache_hits) || 0;
+            document.getElementById("lifetimeGeneratedRequests").textContent = (
+              (parseInt(lifetime.total_requests) || 0) - lifetimeCached
             ).toLocaleString();
+            document.getElementById("lifetimeCachedRequests").textContent =
+              lifetimeCached.toLocaleString();
             document.getElementById("lifetimeUniqueUsers").textContent = (
               parseInt(lifetime.unique_users) || 0
             ).toLocaleString();
             document.getElementById("lifetimeCacheHitRate").textContent =
               (parseFloat(lifetime.cache_hit_rate) || 0).toFixed(1) + "%";
-            document.getElementById("lifetimeCacheHits").textContent = (
-              parseInt(lifetime.total_cache_hits) || 0
-            ).toLocaleString();
 
             if (lifetime.first_request) {
               const firstDate = new Date(lifetime.first_request);
@@ -2477,137 +2936,18 @@
                   minute: "2-digit",
                 });
             }
-
-            // Create lifetime chart with daily data + new users from daily_new_users
-            const lifetimeCtx = document
-              .getElementById("lifetimeChart")
-              .getContext("2d");
-
-            // Use the full-history daily series for the lifetime chart
-            // (falls back to daily_stats if the lifetime series is absent).
-            const allStats = [
-              ...(data.daily_stats_lifetime || data.daily_stats || []),
-            ];
-            // Build a lookup map for daily new users (first-time users per day)
-            const dailyNewUsersMap = {};
-            (data.daily_new_users || []).forEach((d) => {
-              dailyNewUsersMap[d.date] = parseInt(d.new_users || 0);
-            });
-
-            if (allStats.length > 0) {
-              allStats.reverse();
-              const lifetimeLabels = allStats.map((day) =>
-                new Date(day.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                }),
-              );
-              // Smooth out day-to-day noise with a trailing moving average —
-              // raw daily counts over months of history look jagged/spiky.
-              const movingAverage = (values, windowSize) =>
-                values.map((_, i) => {
-                  const start = Math.max(0, i - windowSize + 1);
-                  const window = values.slice(start, i + 1);
-                  const sum = window.reduce((a, b) => a + b, 0);
-                  return sum / window.length;
-                });
-              const smoothingWindow = allStats.length > 14 ? 14 : 1;
-
-              const lifetimeRequestData = movingAverage(
-                allStats.map((day) => parseInt(day.total_requests || 0)),
-                smoothingWindow,
-              );
-              const lifetimeCacheData = movingAverage(
-                allStats.map((day) => parseInt(day.cache_hits || 0)),
-                smoothingWindow,
-              );
-              // Use daily_new_users data (first-time users) instead of daily unique_users
-              const lifetimeNewUserData = movingAverage(
-                allStats.map((day) => dailyNewUsersMap[day.date] || 0),
-                smoothingWindow,
-              );
-
-              // Create gradients for lifetime chart
-              const gradientPurple = lifetimeCtx.createLinearGradient(
-                0,
-                0,
-                0,
-                300,
-              );
-              gradientPurple.addColorStop(0, "rgba(130, 80, 223, 0.2)");
-              gradientPurple.addColorStop(1, "rgba(130, 80, 223, 0.01)");
-
-              const gradientOrange = lifetimeCtx.createLinearGradient(
-                0,
-                0,
-                0,
-                300,
-              );
-              gradientOrange.addColorStop(0, "rgba(191, 57, 137, 0.2)");
-              gradientOrange.addColorStop(1, "rgba(191, 57, 137, 0.01)");
-
-              const gradientTeal = lifetimeCtx.createLinearGradient(
-                0,
-                0,
-                0,
-                300,
-              );
-              gradientTeal.addColorStop(0, "rgba(26, 127, 55, 0.2)");
-              gradientTeal.addColorStop(1, "rgba(26, 127, 55, 0.01)");
-
-              new Chart(lifetimeCtx, {
-                type: "line",
-                data: {
-                  labels: lifetimeLabels,
-                  datasets: [
-                    {
-                      label: "Total Requests",
-                      data: lifetimeRequestData,
-                      borderColor: "#8250df",
-                      backgroundColor: gradientPurple,
-                      borderWidth: 2.5,
-                      tension: 0.4,
-                      fill: true,
-                      pointRadius: 0,
-                      pointHoverRadius: 6,
-                      pointHoverBackgroundColor: "#8250df",
-                      pointHoverBorderColor: "#fff",
-                      pointHoverBorderWidth: 2,
-                    },
-                    {
-                      label: "Cache Hits",
-                      data: lifetimeCacheData,
-                      borderColor: "#bf3989",
-                      backgroundColor: gradientOrange,
-                      borderWidth: 2.5,
-                      tension: 0.4,
-                      fill: true,
-                      pointRadius: 0,
-                      pointHoverRadius: 6,
-                      pointHoverBackgroundColor: "#bf3989",
-                      pointHoverBorderColor: "#fff",
-                      pointHoverBorderWidth: 2,
-                    },
-                    {
-                      label: "New Users",
-                      data: lifetimeNewUserData,
-                      borderColor: "#1a7f37",
-                      backgroundColor: gradientTeal,
-                      borderWidth: 2.5,
-                      tension: 0.4,
-                      fill: true,
-                      pointRadius: 0,
-                      pointHoverRadius: 6,
-                      pointHoverBackgroundColor: "#1a7f37",
-                      pointHoverBorderColor: "#fff",
-                      pointHoverBorderWidth: 2,
-                    },
-                  ],
-                },
-                options: chartConfig,
-              });
-            }
           }
+          renderPeriodCharts("lifetime", allDays, newUsersByDate, 7);
+
+          // Yearly: rolling 12 months, weekly steps.
+          const yearDays = lastDays(365);
+          fillPeriodCards("yearly", yearDays, newUsersByDate);
+          renderPeriodCharts("yearly", yearDays, newUsersByDate, 7);
+
+          // Monthly: rolling 30 days, one step per day.
+          const monthDays = lastDays(30);
+          fillPeriodCards("monthly", monthDays, newUsersByDate);
+          renderPeriodCharts("monthly", monthDays, newUsersByDate, 1);
         } catch (error) {
           console.error("Error loading analytics:", error);
         }
