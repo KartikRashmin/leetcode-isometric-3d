@@ -964,6 +964,726 @@ export const SAKURA_THEME = {
 };
 
 /**
+ * Kanagawa Theme
+ * Ink and wave blues to carp yellow from Kanagawa
+ */
+export const KANAGAWA_THEME = {
+  title: {
+    color: "#7e9cd8",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#e6c384",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#dcd7ba",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#9e9b93",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#dcd7ba",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#98bb6c",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#727169",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(31, 31, 40)",
+    borderColor: "rgb(126, 156, 216)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(126, 156, 216, 0.3)",
+    shadowBlur: 14,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#2a2a37",
+      level1: "#223249",
+      level2: "#2d4f67",
+      level3: "#7e9cd8",
+      level4: "#e6c384",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Gruvbox Theme
+ * Warm retro colors from Gruvbox dark
+ */
+export const GRUVBOX_THEME = {
+  title: {
+    color: "#fabd2f",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#fe8019",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#ebdbb2",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#a89984",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#ebdbb2",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#b8bb26",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#928374",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(40, 40, 40)",
+    borderColor: "rgb(215, 153, 33)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(250, 189, 47, 0.25)",
+    shadowBlur: 14,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#3c3836",
+      level1: "#79740e",
+      level2: "#98971a",
+      level3: "#b8bb26",
+      level4: "#fabd2f",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Rose Pine Theme
+ * Muted pine, foam and rose from Rose Pine
+ */
+export const ROSEPINE_THEME = {
+  title: {
+    color: "#ebbcba",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#f6c177",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#e0def4",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#908caa",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#e0def4",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#9ccfd8",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#6e6a86",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(25, 23, 36)",
+    borderColor: "rgb(235, 188, 186)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(235, 188, 186, 0.3)",
+    shadowBlur: 14,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#26233a",
+      level1: "#31748f",
+      level2: "#9ccfd8",
+      level3: "#ebbcba",
+      level4: "#f6c177",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * One Dark Theme
+ * Atom's One Dark
+ */
+export const ONEDARK_THEME = {
+  title: {
+    color: "#61afef",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#e5c07b",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#d7dae0",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#7f848e",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#abb2bf",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#98c379",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#5c6370",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(40, 44, 52)",
+    borderColor: "rgb(97, 175, 239)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(97, 175, 239, 0.3)",
+    shadowBlur: 14,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#2c313c",
+      level1: "#36506e",
+      level2: "#4a79a8",
+      level3: "#61afef",
+      level4: "#56b6c2",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Monokai Theme
+ * The classic Monokai editor colors
+ */
+export const MONOKAI_THEME = {
+  title: {
+    color: "#f92672",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#a6e22e",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#f8f8f2",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#a59f85",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#f8f8f2",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#66d9ef",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#75715e",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(39, 40, 34)",
+    borderColor: "rgb(249, 38, 114)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(249, 38, 114, 0.3)",
+    shadowBlur: 14,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#3e3d32",
+      level1: "#5b7f1b",
+      level2: "#7fb022",
+      level3: "#a6e22e",
+      level4: "#e6db74",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Matrix Theme
+ * Phosphor green digital rain on black
+ */
+export const MATRIX_THEME = {
+  title: {
+    color: "#00ff41",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#00ff41",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#e1ffe6",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#6fbf73",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#c8f7cf",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#00ff41",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#3a7d44",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(13, 2, 8)",
+    borderColor: "rgb(0, 255, 65)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(0, 255, 65, 0.35)",
+    shadowBlur: 16,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#101c10",
+      level1: "#003b00",
+      level2: "#008f11",
+      level3: "#00c814",
+      level4: "#00ff41",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Synthwave '84 Theme
+ * Retro neon from Synthwave '84
+ */
+export const SYNTHWAVE_THEME = {
+  title: {
+    color: "#ff7edb",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#36f9f6",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#ffffff",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#b6b1c8",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#ffffff",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#72f1b8",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#848bbd",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(38, 35, 53)",
+    borderColor: "rgb(255, 126, 219)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(255, 126, 219, 0.45)",
+    shadowBlur: 18,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#34294f",
+      level1: "#614d85",
+      level2: "#b04fa6",
+      level3: "#ff7edb",
+      level4: "#fede5d",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Halloween Theme
+ * GitHub's Halloween contribution colors
+ */
+export const HALLOWEEN_THEME = {
+  title: {
+    color: "#24292f",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#fa7a18",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#ffffff",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#b7bdc8",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#24292f",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#bd561d",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#57606a",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(22, 27, 34)",
+    borderColor: "rgb(250, 122, 24)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(250, 122, 24, 0.3)",
+    shadowBlur: 12,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#161b22",
+      level1: "#631c03",
+      level2: "#bd561d",
+      level3: "#fa7a18",
+      level4: "#fddf68",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
+ * Solarized Light Theme
+ * Solarized light background with its blue accent
+ */
+export const SOLARIZED_THEME = {
+  title: {
+    color: "#586e75",
+    fontFamily: "Segoe UI",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  value: {
+    color: "#268bd2",
+    fontFamily: "Segoe UI",
+    fontSize: 24,
+    fontWeight: "600",
+    lineHeight: 30,
+  },
+  label: {
+    color: "#073642",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  subtext: {
+    color: "#657b83",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+  },
+  averageText: {
+    color: "#586e75",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  averageValue: {
+    color: "#859900",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  averageUnit: {
+    color: "#93a1a1",
+    fontFamily: "Segoe UI",
+    fontSize: 12,
+    fontWeight: "400",
+  },
+  box: {
+    backgroundColor: "rgb(253, 246, 227)",
+    borderColor: "rgb(147, 161, 161)",
+    borderWidth: 2,
+    borderRadius: 8,
+    shadowColor: "rgba(0, 0, 0, 0.12)",
+    shadowBlur: 10,
+    shadowOffsetX: 0,
+    shadowOffsetY: 3,
+  },
+  graph: {
+    colors: {
+      level0: "#eee8d5",
+      level1: "#a9cbe6",
+      level2: "#6aa9dc",
+      level3: "#268bd2",
+      level4: "#1b5e8f",
+    },
+  },
+  dimensions: {
+    contributionsBoxWidth: 316,
+    contributionsBoxHeight: 84,
+    streaksBoxWidth: 254,
+    streaksBoxHeight: 80,
+    titleHeight: 24,
+    averageBottomMargin: 16,
+  },
+};
+
+/**
  * Available themes
  */
 export const THEMES = {
@@ -979,6 +1699,15 @@ export const THEMES = {
   tokyonight: TOKYONIGHT_THEME,
   sunset: SUNSET_THEME,
   sakura: SAKURA_THEME,
+  kanagawa: KANAGAWA_THEME,
+  gruvbox: GRUVBOX_THEME,
+  rosepine: ROSEPINE_THEME,
+  onedark: ONEDARK_THEME,
+  monokai: MONOKAI_THEME,
+  matrix: MATRIX_THEME,
+  synthwave: SYNTHWAVE_THEME,
+  halloween: HALLOWEEN_THEME,
+  solarized: SOLARIZED_THEME,
 };
 
 /**

@@ -28,35 +28,12 @@ import {
 } from "./src/renderer.js";
 import { renderSVG } from "./src/svg-renderer.js";
 import {
+  THEMES,
   GITHUB_THEME,
-  DARK_THEME,
-  LIGHT_THEME,
-  NEON_THEME,
-  MINIMAL_THEME,
-  OCEAN_THEME,
-  CATPPUCCIN_THEME,
-  DRACULA_THEME,
-  CRIMSON_THEME,
-  TOKYONIGHT_THEME,
-  SUNSET_THEME,
-  SAKURA_THEME,
   buildCustomTheme,
 } from "./src/theme-config.js";
 // Available themes mapping
-const AVAILABLE_THEMES = {
-  github: GITHUB_THEME,
-  dark: DARK_THEME,
-  light: LIGHT_THEME,
-  neon: NEON_THEME,
-  minimal: MINIMAL_THEME,
-  ocean: OCEAN_THEME,
-  catppuccin: CATPPUCCIN_THEME,
-  dracula: DRACULA_THEME,
-  crimson: CRIMSON_THEME,
-  tokyonight: TOKYONIGHT_THEME,
-  sunset: SUNSET_THEME,
-  sakura: SAKURA_THEME,
-};
+const AVAILABLE_THEMES = THEMES;
 const PORT = process.env.PORT || 3000;
 const BUCKET_NAME = process.env.SUPABASE_BUCKET_NAME || "isometric-cache";
 const CONTENT_TYPES = {

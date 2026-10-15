@@ -63,6 +63,48 @@ Generate beautiful 3D isometric visualizations of GitHub contribution graphs, as
   </tr>
   <tr>
     <td align="center">
+      <img src="media/examples/output-kanagawa.svg" width="300" alt="Kanagawa Theme"/><br/>
+      <b>Kanagawa Theme</b>
+    </td>
+    <td align="center">
+      <img src="media/examples/output-gruvbox.svg" width="300" alt="Gruvbox Theme"/><br/>
+      <b>Gruvbox Theme</b>
+    </td>
+    <td align="center">
+      <img src="media/examples/output-rosepine.svg" width="300" alt="Rose Pine Theme"/><br/>
+      <b>Rose Pine Theme</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="media/examples/output-onedark.svg" width="300" alt="One Dark Theme"/><br/>
+      <b>One Dark Theme</b>
+    </td>
+    <td align="center">
+      <img src="media/examples/output-monokai.svg" width="300" alt="Monokai Theme"/><br/>
+      <b>Monokai Theme</b>
+    </td>
+    <td align="center">
+      <img src="media/examples/output-matrix.svg" width="300" alt="Matrix Theme"/><br/>
+      <b>Matrix Theme</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="media/examples/output-synthwave.svg" width="300" alt="Synthwave '84 Theme"/><br/>
+      <b>Synthwave '84 Theme</b>
+    </td>
+    <td align="center">
+      <img src="media/examples/output-halloween.svg" width="300" alt="Halloween Theme"/><br/>
+      <b>Halloween Theme</b>
+    </td>
+    <td align="center">
+      <img src="media/examples/output-solarized.svg" width="300" alt="Solarized Light Theme"/><br/>
+      <b>Solarized Light Theme</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
       <img src="media/examples/output-not-stats.svg" width="300" alt="Without Stats"/><br/>
       <b>Without Stats</b>
     </td>
@@ -88,7 +130,7 @@ Generate beautiful 3D isometric visualizations of GitHub contribution graphs, as
 ## Features
 
 - ⚡ **Fast API** with intelligent caching and revalidation
-- 🎨 **12 Built-in Themes**: GitHub, Dark, Light, Neon, Minimal, Ocean, Catppuccin, Dracula, Crimson, Tokyo Night, Sunset, Sakura
+- 🎨 **21 Built-in Themes**: GitHub, Dark, Light, Neon, Minimal, Ocean, Catppuccin, Dracula, Crimson, Tokyo Night, Sunset, Sakura, Kanagawa, Gruvbox, Rose Pine, One Dark, Monokai, Matrix, Synthwave '84, Halloween, Solarized Light
 - 🖌️ **Custom Themes**: design your own colors via the API or the in-page theme builder
 - 📊 **Statistics Overlay**: Contributions, streaks, averages
 - 🖼️ **Customizable**: Dimensions, year selection, credits, themes
@@ -183,7 +225,7 @@ Returns an SVG by default. Add `format=png` for a PNG.
 | ---------- | ------------- | -------- | ----------------- | ------------------------------------------------------------------------------- |
 | `username` | string        | ✅ Yes   | -                 | GitHub username                                                                 |
 | `year`/`y` | number/string | No       | `none` (365 days) | Year to fetch (e.g., `2025`), or `none` for 365-day rolling window ending today |
-| `theme`    | string        | No       | `github`          | Visual theme: `github`, `dark`, `light`, `neon`, `minimal`, `ocean`, `catppuccin`, `dracula`, `crimson`, `tokyonight`, `sunset`, `sakura`, or `custom` (see [Custom Themes](#custom-themes)) |
+| `theme`    | string        | No       | `github`          | Visual theme: `github`, `dark`, `light`, `neon`, `minimal`, `ocean`, `catppuccin`, `dracula`, `crimson`, `tokyonight`, `sunset`, `sakura`, `kanagawa`, `gruvbox`, `rosepine`, `onedark`, `monokai`, `matrix`, `synthwave`, `halloween`, `solarized`, or `custom` (see [Custom Themes](#custom-themes)) |
 | `colors`   | string        | No       | -                 | Custom mode only. Five comma-separated hex colors for the cube levels 0 to 4, e.g. `colors=161b22,0e4429,006d32,26a641,39d353` (leading `#` optional) |
 | `bg`       | string        | No       | -                 | Custom mode only. Hex background for the stats box (applies only with `stats=true`)             |
 | `border`   | string        | No       | -                 | Custom mode only. Hex border for the stats box (applies only with `stats=true`)                 |
@@ -408,6 +450,15 @@ import {
   TOKYONIGHT_THEME,
   SUNSET_THEME,
   SAKURA_THEME,
+  KANAGAWA_THEME,
+  GRUVBOX_THEME,
+  ROSEPINE_THEME,
+  ONEDARK_THEME,
+  MONOKAI_THEME,
+  MATRIX_THEME,
+  SYNTHWAVE_THEME,
+  HALLOWEEN_THEME,
+  SOLARIZED_THEME,
   buildCustomTheme,
 } from "./src/theme-config.js";
 import { setTheme } from "./src/renderer.js";
