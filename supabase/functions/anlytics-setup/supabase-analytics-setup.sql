@@ -2,6 +2,9 @@
 -- Creates a table to track API usage statistics
 -- Run this in Supabase SQL Editor
 
+-- Usernames are counted case-insensitively: GitHub logins are, and rows
+-- written before the server lowercased usernames can be mixed-case.
+
 -- Create analytics table
 CREATE TABLE IF NOT EXISTS public.api_analytics (
   id BIGSERIAL PRIMARY KEY,
@@ -57,7 +60,7 @@ AS $$
   SELECT 
     DATE(created_at) as date,
     COUNT(*) as total_requests,
-    COUNT(DISTINCT username) as unique_users,
+    COUNT(DISTINCT LOWER(username)) as unique_users,
     COUNT(*) FILTER (WHERE cache_hit = true) as cache_hits
   FROM public.api_analytics
   WHERE created_at >= NOW() - (days_back || ' days')::INTERVAL
@@ -79,7 +82,7 @@ AS $$
   SELECT
     DATE(created_at) as date,
     COUNT(*) as total_requests,
-    COUNT(DISTINCT username) as unique_users,
+    COUNT(DISTINCT LOWER(username)) as unique_users,
     COUNT(*) FILTER (WHERE cache_hit = true) as cache_hits
   FROM public.api_analytics
   GROUP BY DATE(created_at)
@@ -118,10 +121,10 @@ LANGUAGE SQL
 STABLE
 AS $$
   SELECT 
-    username,
+    LOWER(username) as username,
     COUNT(*) as request_count
   FROM public.api_analytics
-  GROUP BY username
+  GROUP BY LOWER(username)
   ORDER BY request_count DESC
   LIMIT limit_count;
 $$;
@@ -141,7 +144,7 @@ STABLE
 AS $$
   SELECT 
     COUNT(*) as total_requests,
-    COUNT(DISTINCT username) as unique_users,
+    COUNT(DISTINCT LOWER(username)) as unique_users,
     COUNT(*) FILTER (WHERE cache_hit = true) as total_cache_hits,
     ROUND((COUNT(*) FILTER (WHERE cache_hit = true) * 100.0 / NULLIF(COUNT(*), 0)), 2) as cache_hit_rate,
     MIN(created_at) as first_request,
@@ -161,9 +164,9 @@ STABLE
 AS $$
   SELECT DATE(first_seen) as date, COUNT(*) as new_users
   FROM (
-    SELECT username, MIN(DATE(created_at)) as first_seen
+    SELECT LOWER(username) as username, MIN(DATE(created_at)) as first_seen
     FROM public.api_analytics
-    GROUP BY username
+    GROUP BY LOWER(username)
   ) sub
   GROUP BY DATE(first_seen)
   ORDER BY date DESC;
@@ -183,7 +186,7 @@ AS $$
   SELECT
     DATE_TRUNC('month', created_at)::DATE as month,
     COUNT(*) as total_requests,
-    COUNT(DISTINCT username) as unique_users,
+    COUNT(DISTINCT LOWER(username)) as unique_users,
     COUNT(*) FILTER (WHERE cache_hit = true) as cache_hits
   FROM public.api_analytics
   GROUP BY DATE_TRUNC('month', created_at)
@@ -201,9 +204,9 @@ STABLE
 AS $$
   SELECT DATE_TRUNC('month', first_seen)::DATE as month, COUNT(*) as new_users
   FROM (
-    SELECT username, MIN(DATE(created_at)) as first_seen
+    SELECT LOWER(username) as username, MIN(DATE(created_at)) as first_seen
     FROM public.api_analytics
-    GROUP BY username
+    GROUP BY LOWER(username)
   ) sub
   GROUP BY DATE_TRUNC('month', first_seen)
   ORDER BY month DESC;
