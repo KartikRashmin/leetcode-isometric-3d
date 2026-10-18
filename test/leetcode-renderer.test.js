@@ -41,6 +41,8 @@ test("dark and light themes use upstream face shading with orange palettes", () 
     }
     assert.equal(doc.querySelector('#leetcode-solved-panel').getAttribute('rx'), '8');
     assert.equal(doc.querySelector('#leetcode-solved-panel').getAttribute('stroke-width'), '2');
+    assert.equal(doc.querySelector('#leetcode-activity-panel').getAttribute('width'), '280');
+    assert.equal(doc.querySelector('#leetcode-activity-panel').getAttribute('height'), '68');
     assert.equal(doc.querySelector('#leetcode-logo').querySelectorAll('path').length, 3);
     assert.equal(doc.querySelector('#leetcode-logo path').getAttribute('fill'), '#ffa116');
     assert.equal(doc.querySelector('#leetcode-logo path:last-child').getAttribute('fill'), theme.label.color);
@@ -59,7 +61,7 @@ test("live-model fields drive labels and ring fractions, with distinct submissio
   for (const value of [profile.solved.total, profile.activity.totalSubmissions, profile.activity.activeDays,
     profile.activity.longestStreak]) assert.ok(labels.includes(String(value)));
   assert.ok(labels.includes("Active Days"));
-  assert.ok(labels.includes("Longest (365d)"));
+  assert.ok(labels.includes("Max Streak"));
   assert.equal(labels.includes("Current Streak"), false);
   assert.equal(labels.some((label) => label.includes("Attempting")), false);
   for (const key of ["easy", "medium", "hard"]) {
@@ -130,7 +132,7 @@ test("panel backgrounds survive SVG rasterization in both themes", async () => {
     ctx.drawImage(await loadImage(Buffer.from(renderLeetCodeSVG(profileFixture("zero"), { theme }))), 0, 0);
     const expected = name === "dark" ? [22, 27, 34, 255] : [255, 255, 255, 255];
     assert.deepEqual([...ctx.getImageData(700, 60, 1, 1).data], expected);
-    assert.deepEqual([...ctx.getImageData(35, 490, 1, 1).data], expected);
+    assert.deepEqual([...ctx.getImageData(35, 500, 1, 1).data], expected);
   }
 });
 

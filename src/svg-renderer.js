@@ -365,19 +365,21 @@ function renderLeetCodeStats(text, theme, profile, width, height, scale, heading
     { text: "submissions in 365 days", gap: 4 * scale, style: scaled(theme.averageUnit, scale) },
   ], x + panelWidth, y + 197 * scale, "end");
 
-  const activityY = height - (80 + theme.dimensions.titleHeight + theme.dimensions.averageBottomMargin) * scale - margin;
+  const activityWidth = 280;
+  const activityHeight = 68;
+  const activityY = height - (activityHeight + theme.dimensions.titleHeight + theme.dimensions.averageBottomMargin) * scale - margin;
   out += `<g id="leetcode-activity">`;
-  out += renderPanel(text, theme, "Activity", margin, activityY, 348 * scale, 80 * scale, scale, "leetcode-activity");
+  out += renderPanel(text, theme, "Activity", margin, activityY, activityWidth * scale, activityHeight * scale, scale, "leetcode-activity");
   const rowY = activityY + theme.dimensions.titleHeight * scale;
   const metrics = [
     [profile.activity.activeDays, "Active Days", "Last 365 days"],
-    [profile.activity.longestStreak, "Longest (365d)", "Consecutive days"],
+    [profile.activity.longestStreak, "Max Streak", "Consecutive days"],
   ];
   metrics.forEach(([value, label, description], i) => {
-    const itemX = margin + (87 + i * 174) * scale;
-    out += text.write([{ text: value, style: scaled(theme.value, scale) }], itemX, rowY + 34 * scale, "center");
-    out += text.write([{ text: label, style: scaled(theme.label, scale) }], itemX, rowY + 50 * scale, "center");
-    out += text.write([{ text: description, style: scaled(theme.subtext, scale) }], itemX, rowY + 66 * scale, "center");
+    const itemX = margin + (18 + i * 140) * scale;
+    out += text.write([{ text: value, style: scaled(theme.value, scale) }], itemX, rowY + 27 * scale);
+    out += text.write([{ text: label, style: scaled(theme.label, scale) }], itemX, rowY + 42 * scale);
+    out += text.write([{ text: description, style: scaled(theme.subtext, scale) }], itemX, rowY + 56 * scale);
   });
   return out + "</g>";
 }
