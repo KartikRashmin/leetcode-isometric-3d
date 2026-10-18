@@ -9,6 +9,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import opentype from "opentype.js";
+import { toRendererDays } from "./leetcode-stats.js";
+import { LEETCODE_DARK_THEME } from "./leetcode-theme.js";
 import {
   calculateStats,
   getCubeColor,
@@ -34,11 +36,10 @@ const FONTS = {
   bold: loadFont("Segoe UI Bold.ttf"),
   symbol: loadFont("Segoe UI Symbol Arrows.ttf"),
 };
-const FONT_KEYS = new Map([
-  [FONTS.regular, "r"],
-  [FONTS.bold, "b"],
-  [FONTS.symbol, "s"],
-]);
+const LEETCODE_FONTS = {
+  regular: loadFont("Selawik-Regular.ttf"),
+  bold: loadFont("Selawik-Semibold.ttf"),
+};
 const LAYOUT = { kerning: true };
 
 // Thin lines between tiles of equal height. In the PNG these are the side
@@ -58,17 +59,19 @@ const escapeXML = (text) =>
  * Collects text as outlined glyphs. Each glyph's path is defined once in
  * <defs> and placed with <use>, which keeps repeated digits cheap.
  */
-function createTextWriter() {
+function createTextWriter(fonts = FONTS) {
   const glyphDefs = new Map();
+  const fontKeys = new Map([[fonts.regular, "r"], [fonts.bold, "b"]]);
+  if (fonts.symbol) fontKeys.set(fonts.symbol, "s");
 
   const fontFor = (weight) =>
-    weight === "bold" || Number(weight) >= 600 ? FONTS.bold : FONTS.regular;
+    weight === "bold" || Number(weight) >= 600 ? fonts.bold : fonts.regular;
 
   // Split text into [font, text] runs by which font has each glyph
   function fontRuns(font, text) {
     const runs = [];
     for (const char of text) {
-      const runFont = font.charToGlyphIndex(char) ? font : FONTS.symbol;
+      const runFont = font.charToGlyphIndex(char) ? font : (fonts.symbol || fonts.regular);
       const last = runs.at(-1);
       if (last && last[0] === runFont) last[1] += char;
       else runs.push([runFont, char]);
@@ -89,7 +92,7 @@ function createTextWriter() {
     let cursor = x;
     for (const [font, run] of fontRuns(fontFor(style.fontWeight), text)) {
       const unitsPerEm = font.unitsPerEm;
-      const key = FONT_KEYS.get(font);
+      const key = fontKeys.get(font);
       font.forEachGlyph(run, cursor, y, style.fontSize, LAYOUT, (glyph, gx, gy, size) => {
         const id = `iso-${key}${glyph.index}`;
         if (!glyphDefs.has(id)) {
@@ -102,7 +105,7 @@ function createTextWriter() {
       });
       cursor += font.getAdvanceWidth(run, style.fontSize, LAYOUT);
     }
-    return `<g fill="${escapeXML(style.color)}">${uses}</g>`;
+    return `<g aria-label="${escapeXML(text)}" fill="${escapeXML(style.color)}">${uses}</g>`;
   }
 
   /**
@@ -115,8 +118,8 @@ function createTextWriter() {
   function write(pieces, x, y, align = "start") {
     const widths = pieces.map((p) => measure(String(p.text), p.style));
     let cursor = x;
-    if (align === "end") {
-      cursor -= pieces.reduce((sum, p, i) => sum + (p.gap || 0) + widths[i], 0);
+    if (align === "end" || align === "center") {
+      cursor -= pieces.reduce((sum, p, i) => sum + (p.gap || 0) + widths[i], 0) / (align === "center" ? 2 : 1);
     }
     let out = "";
     pieces.forEach((piece, i) => {
@@ -127,7 +130,7 @@ function createTextWriter() {
     return out;
   }
 
-  return { write, defs: () => [...glyphDefs.values()].join("") };
+  return { write, measure, defs: () => [...glyphDefs.values()].join("") };
 }
 
 /**
@@ -140,6 +143,22 @@ const scaled = (style, scale) => ({
   fontWeight: style.fontWeight,
   fontSize: style.fontSize * scale,
 });
+
+// Shared by the original GitHub overlay and the LeetCode overlay.
+function renderPanel(text, theme, title, x, y, width, height, scale, id) {
+  const boxY = y + theme.dimensions.titleHeight * scale;
+  const style = theme.box;
+  const dx = style.shadowOffsetX * scale;
+  const dy = style.shadowOffsetY * scale;
+  const blur = ((style.shadowBlur * scale) / 2) * 1.1;
+  const pad = 3 * blur + Math.max(Math.abs(dx), Math.abs(dy)) + style.borderWidth * scale;
+  return text.write([{ text: title, style: scaled(theme.title, scale) }], x, y + 16 * scale) +
+    `<filter id="${id}-shadow" filterUnits="userSpaceOnUse" x="${num(x - pad)}" y="${num(boxY - pad)}" width="${num(width + 2 * pad)}" height="${num(height + 2 * pad)}"><feGaussianBlur in="SourceAlpha" stdDeviation="${num(blur)}"/><feOffset dx="${num(dx)}" dy="${num(dy)}" result="shadow"/><feFlood flood-color="${escapeXML(style.shadowColor)}"/><feComposite in2="shadow" operator="in"/></filter>` +
+    // SVG 1.1 shadow primitives work in browsers and librsvg. Keep the
+    // visible panel outside the filter as a fallback for other rasterizers.
+    `<rect x="${num(x)}" y="${num(boxY)}" width="${num(width)}" height="${num(height)}" rx="${num(style.borderRadius * scale)}" fill="${escapeXML(style.backgroundColor)}" filter="url(#${id}-shadow)"/>` +
+    `<rect id="${id}-panel" x="${num(x)}" y="${num(boxY)}" width="${num(width)}" height="${num(height)}" rx="${num(style.borderRadius * scale)}" fill="${escapeXML(style.backgroundColor)}" stroke="${escapeXML(style.borderColor)}" stroke-width="${num(style.borderWidth * scale)}"/>`;
+}
 
 /**
  * Render the cubes as SVG paths, with seams between equal-height neighbours
@@ -214,26 +233,9 @@ function renderStats(text, theme, stats, width, height, scale) {
   const dims = theme.dimensions;
   const margin = 25 * scale;
 
-  // The canvas spec makes shadowBlur twice the Gaussian standard deviation,
-  // but node-canvas's shadows measure about 10% wider, so match those.
-  const boxStyle = theme.box;
-  const dx = boxStyle.shadowOffsetX * scale;
-  const dy = boxStyle.shadowOffsetY * scale;
-  const blur = ((boxStyle.shadowBlur * scale) / 2) * 1.1;
   let boxCount = 0;
-
-  const box = (title, x, y, boxWidth, boxHeight) => {
-    const boxY = y + dims.titleHeight * scale;
-    // The filter region is sized in pixels so the full blur fits around
-    // the box; a percentage region clips large glows like the Neon theme's.
-    const pad = 3 * blur + Math.max(Math.abs(dx), Math.abs(dy)) + boxStyle.borderWidth * scale;
-    const id = `iso-shadow-${boxCount++}`;
-    return (
-      text.write([{ text: title, style: scaled(theme.title, scale) }], x, y + 16 * scale) +
-      `<filter id="${id}" filterUnits="userSpaceOnUse" x="${num(x - pad)}" y="${num(boxY - pad)}" width="${num(boxWidth + 2 * pad)}" height="${num(boxHeight + 2 * pad)}"><feDropShadow dx="${num(dx)}" dy="${num(dy)}" stdDeviation="${num(blur)}" flood-color="${escapeXML(boxStyle.shadowColor)}"/></filter>` +
-      `<rect x="${num(x)}" y="${num(boxY)}" width="${num(boxWidth)}" height="${num(boxHeight)}" rx="${num(boxStyle.borderRadius * scale)}" fill="${escapeXML(boxStyle.backgroundColor)}" stroke="${escapeXML(boxStyle.borderColor)}" stroke-width="${num(boxStyle.borderWidth * scale)}" filter="url(#${id})"/>`
-    );
-  };
+  const box = (title, x, y, boxWidth, boxHeight) =>
+    renderPanel(text, theme, title, x, y, boxWidth, boxHeight, scale, `iso-${boxCount++}`);
 
   // Value, label and subtext stacked, like drawFlexStatItem()
   const item = (value, label, subtext, x, y) =>
@@ -289,6 +291,101 @@ function renderStats(text, theme, stats, width, height, scale) {
   return out;
 }
 
+function fitLabel(text, value, style, maxWidth) {
+  if (text.measure(value, style) <= maxWidth) return value;
+  let fitted = value;
+  while (fitted.length && text.measure(`${fitted}…`, style) > maxWidth) fitted = fitted.slice(0, -1);
+  return `${fitted}…`;
+}
+
+function ringArc(cx, cy, radius, start, end) {
+  const point = (degrees) => {
+    const angle = degrees * Math.PI / 180;
+    return `${num(cx + radius * Math.cos(angle))} ${num(cy + radius * Math.sin(angle))}`;
+  };
+  return `M${point(start)} A${num(radius)} ${num(radius)} 0 ${end - start > 180 ? 1 : 0} 1 ${point(end)}`;
+}
+
+function renderLeetCodeStats(text, theme, profile, width, height, scale, heading) {
+  const margin = 25 * scale;
+  const panelWidth = theme.dimensions.contributionsBoxWidth * scale;
+  const x = width - panelWidth - margin;
+  const y = margin + theme.dimensions.titleHeight * scale;
+  const title = fitLabel(text, heading, scaled(theme.title, scale), panelWidth);
+  let out = `<g id="leetcode-solved" aria-label="${escapeXML(heading)}">`;
+  out += renderPanel(text, theme, title, x, margin, panelWidth, 176 * scale, scale, "leetcode-solved");
+
+  const cx = x + 80 * scale;
+  const cy = y + 88 * scale;
+  const radius = 60 * scale;
+  const difficulties = ["easy", "medium", "hard"];
+  difficulties.forEach((key, i) => {
+    const label = key[0].toUpperCase() + key.slice(1);
+    const color = theme.difficulty[i];
+    const solved = profile.solved[key];
+    const available = profile.available[key];
+    const progress = available > 0 ? Math.min(1, Math.max(0, solved / available)) : 0;
+    const start = -85 + i * 120;
+    const end = start + 110;
+    out += `<g data-difficulty="${key}" aria-label="${label}: ${solved} of ${available} solved">`;
+    out += `<path data-ring="track" d="${ringArc(cx, cy, radius, start, end)}" fill="none" stroke="${escapeXML(color)}" stroke-opacity=".18" style="stroke-width:${6 * scale}px" stroke-linecap="round"/>`;
+    if (progress > 0) {
+      out += `<path data-ring="progress" data-progress="${progress}" d="${ringArc(cx, cy, radius, start, start + 110 * progress)}" fill="none" stroke="${escapeXML(color)}" style="stroke-width:${6 * scale}px" stroke-linecap="round"/>`;
+    }
+    const rowX = x + 163 * scale;
+    const rowY = y + (37 + i * 45) * scale;
+    out += text.write([{ text: label, style: { ...scaled(theme.label, scale), color } }], rowX, rowY);
+    out += text.write([
+      { text: solved, style: { ...scaled(theme.label, scale), fontSize: 18 * scale } },
+      { text: `/ ${available}`, gap: 5 * scale, style: scaled(theme.subtext, scale) },
+    ], rowX, rowY + 22 * scale);
+    out += "</g>";
+  });
+
+  // Keep larger totals inside the ring without changing its geometry.
+  const countStyle = { ...scaled(theme.value, scale), fontSize: 28 * scale };
+  const denominatorStyle = scaled(theme.subtext, scale);
+  const countWidth = text.measure(String(profile.solved.total), countStyle);
+  const denominatorWidth = text.measure(`/ ${profile.available.total}`, denominatorStyle) + 4 * scale;
+  const stacked = countWidth + denominatorWidth > 100 * scale;
+  if (stacked) {
+    countStyle.fontSize *= Math.min(1, 100 * scale / countWidth);
+    out += text.write([{ text: profile.solved.total, style: countStyle }], cx, cy - 18 * scale, "center");
+    out += text.write([{ text: `/ ${profile.available.total}`, style: denominatorStyle }], cx, cy, "center");
+  } else {
+    out += text.write([
+      { text: profile.solved.total, style: countStyle },
+      { text: `/ ${profile.available.total}`, gap: 4 * scale, style: denominatorStyle },
+    ], cx, cy - 6 * scale, "center");
+  }
+  out += text.write([{ text: "Solved", style: scaled(theme.label, scale) }], cx, cy + (stacked ? 18 : 13) * scale, "center");
+  if (profile.attempting !== null && profile.attempting !== undefined) {
+    out += text.write([{ text: `${profile.attempting} Attempting`, style: scaled(theme.subtext, scale) }], cx, cy + (stacked ? 36 : 32) * scale, "center");
+  }
+  out += "</g>";
+  out += text.write([
+    { text: profile.activity.totalSubmissions, style: scaled(theme.averageValue, scale) },
+    { text: "submissions in 365 days", gap: 4 * scale, style: scaled(theme.averageUnit, scale) },
+  ], x + panelWidth, y + 197 * scale, "end");
+
+  const activityY = height - (80 + theme.dimensions.titleHeight + theme.dimensions.averageBottomMargin) * scale - margin;
+  out += `<g id="leetcode-activity">`;
+  out += renderPanel(text, theme, "Activity", margin, activityY, 348 * scale, 80 * scale, scale, "leetcode-activity");
+  const rowY = activityY + theme.dimensions.titleHeight * scale;
+  const metrics = [
+    [profile.activity.activeDays, "Active Days", "Last 365 days"],
+    [profile.activity.longestStreak, "Longest (365d)", "Consecutive days"],
+    [profile.activity.currentStreak, "Current Streak", "Consecutive days"],
+  ];
+  metrics.forEach(([value, label, description], i) => {
+    const itemX = margin + (16 + i * 111) * scale;
+    out += text.write([{ text: value, style: scaled(theme.value, scale) }], itemX, rowY + 34 * scale);
+    out += text.write([{ text: label, style: scaled(theme.label, scale) }], itemX, rowY + 50 * scale);
+    out += text.write([{ text: description, style: scaled(theme.subtext, scale) }], itemX, rowY + 66 * scale);
+  });
+  return out + "</g>";
+}
+
 /**
  * Render isometric contribution graph as an SVG document
  * @param {Array} days - Array of day objects with {date, count, color, week}
@@ -307,14 +404,18 @@ export function renderSVG(days, options = {}) {
     stats = false,
     username = null,
     theme = getStyleConfig(),
+    profile = null,
+    heading = "Problems Solved",
   } = options;
   const scale = Math.min(width / 1000, height / 600);
   const layout = layoutChart(days, { width, height, theme });
   const cubes = renderCubes(layout);
-  const text = createTextWriter();
-  const summary = calculateStats(days);
+  const text = createTextWriter(profile ? LEETCODE_FONTS : FONTS);
+  const summary = profile ? null : calculateStats(days);
 
-  let overlay = stats ? renderStats(text, theme, summary, width, height, scale) : "";
+  let overlay = stats ? (profile
+    ? renderLeetCodeStats(text, theme, profile, width, height, scale, heading)
+    : renderStats(text, theme, summary, width, height, scale)) : "";
 
   // Username credit, bottom right at half opacity like drawUsernameCredit()
   if (username) {
@@ -324,17 +425,38 @@ export function renderSVG(days, options = {}) {
       fontWeight: "400",
       fontSize: 11 * scale,
     };
-    overlay += `<g opacity=".5">${text.write([{ text: `@${username}`, style }], width - padding, height - padding, "end")}</g>`;
+    const credit = profile ? fitLabel(text, `@${username}`, style, 340 * scale) : `@${username}`;
+    overlay += `<g opacity="${profile ? ".8" : ".5"}">${text.write([{ text: credit, style }], width - padding, height - padding, "end")}</g>`;
   }
 
-  const title = `Isometric GitHub contribution graph${username ? ` for @${username}` : ""}: ${summary.countTotal} contributions`;
+  const title = profile
+    ? `LeetCode isometric activity${username ? ` for @${username}` : ""}: ${profile.solved.total} solved problems`
+    : `Isometric GitHub contribution graph${username ? ` for @${username}` : ""}: ${summary.countTotal} contributions`;
+  const description = profile
+    ? `UTC ${profile.from} to ${profile.to}. ${profile.activity.totalSubmissions} submissions, ${profile.activity.activeDays} active days. Longest streak in 365 days: ${profile.activity.longestStreak}; current streak: ${profile.activity.currentStreak}. All-time solved: ${profile.solved.total} of ${profile.available.total}. Easy: ${profile.solved.easy} of ${profile.available.easy}; Medium: ${profile.solved.medium} of ${profile.available.medium}; Hard: ${profile.solved.hard} of ${profile.available.hard}. Attempting: ${profile.attempting ?? "unavailable"}. Each ring segment shows solved / available for one difficulty. Based on Spectrewolf8's isometric renderer.`
+    : "";
 
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="iso-title">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="iso-title"${profile ? ' aria-describedby="iso-desc"' : ""}>` +
     `<title id="iso-title">${escapeXML(title)}</title>` +
+    (profile ? `<desc id="iso-desc">${escapeXML(description)}</desc><rect width="100%" height="100%" fill="${escapeXML(theme.background)}"/>` : "") +
     `<defs><style>${cubes.css}path{stroke-width:.5px;stroke-linejoin:round}</style>${text.defs()}</defs>` +
-    cubes.markup +
+    `<g class="iso-cubes">${cubes.markup}</g>` +
     overlay +
     "</svg>"
   );
+}
+
+/** LeetCode edition of the existing SVG renderer; cube geometry is shared verbatim. */
+export function renderLeetCodeSVG(profile, options = {}) {
+  const { width = 1000, height = 600, stats = true, credit = true, theme = LEETCODE_DARK_THEME,
+    heading = "Problems Solved" } = options;
+  if (![width, height].every((n) => Number.isInteger(n) && n > 0 && n <= 10000)) {
+    throw new Error("SVG dimensions must be positive integers at most 10000");
+  }
+  // A fixed viewBox preserves the upstream projection at every embedding size.
+  const svg = renderSVG(toRendererDays(profile.days), {
+    width: 1000, height: 600, stats, username: credit ? profile.username : null, theme, profile, heading,
+  });
+  return svg.replace('width="1000" height="600"', `width="${width}" height="${height}"`);
 }
