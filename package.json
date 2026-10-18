@@ -13,6 +13,7 @@
     "dev": "node --watch server.js",
     "test:api": "node test-api.js",
     "test:concurrency": "node test-concurrency.js",
+    "test:leetcode": "node --test test/leetcode-data.test.js",
     "cleanup": "node cleanup-cache.js",
     "cleanup:scheduler": "node cleanup-scheduler.js"
   },
