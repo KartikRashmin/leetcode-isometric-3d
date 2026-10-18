@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import opentype from "opentype.js";
 import { toRendererDays } from "./leetcode-stats.js";
 import { LEETCODE_DARK_THEME } from "./leetcode-theme.js";
+import { renderLeetCodeLogo } from "./leetcode-logo.js";
 import {
   calculateStats,
   getCubeColor,
@@ -333,7 +334,7 @@ function renderLeetCodeStats(text, theme, profile, width, height, scale, heading
     }
     const rowX = x + 163 * scale;
     const rowY = y + (37 + i * 45) * scale;
-    out += text.write([{ text: label, style: { ...scaled(theme.label, scale), color } }], rowX, rowY);
+    out += text.write([{ text: label, style: { ...scaled(theme.label, scale), color: theme.difficultyLabel[i] } }], rowX, rowY);
     out += text.write([
       { text: solved, style: { ...scaled(theme.label, scale), fontSize: 18 * scale } },
       { text: `/ ${available}`, gap: 5 * scale, style: scaled(theme.subtext, scale) },
@@ -349,18 +350,15 @@ function renderLeetCodeStats(text, theme, profile, width, height, scale, heading
   const stacked = countWidth + denominatorWidth > 100 * scale;
   if (stacked) {
     countStyle.fontSize *= Math.min(1, 100 * scale / countWidth);
-    out += text.write([{ text: profile.solved.total, style: countStyle }], cx, cy - 18 * scale, "center");
-    out += text.write([{ text: `/ ${profile.available.total}`, style: denominatorStyle }], cx, cy, "center");
+    out += text.write([{ text: profile.solved.total, style: countStyle }], cx, cy - 8 * scale, "center");
+    out += text.write([{ text: `/ ${profile.available.total}`, style: denominatorStyle }], cx, cy + 10 * scale, "center");
   } else {
     out += text.write([
       { text: profile.solved.total, style: countStyle },
       { text: `/ ${profile.available.total}`, gap: 4 * scale, style: denominatorStyle },
-    ], cx, cy - 6 * scale, "center");
+    ], cx, cy + 4 * scale, "center");
   }
-  out += text.write([{ text: "Solved", style: scaled(theme.label, scale) }], cx, cy + (stacked ? 18 : 13) * scale, "center");
-  if (profile.attempting !== null && profile.attempting !== undefined) {
-    out += text.write([{ text: `${profile.attempting} Attempting`, style: scaled(theme.subtext, scale) }], cx, cy + (stacked ? 36 : 32) * scale, "center");
-  }
+  out += text.write([{ text: "Solved", style: scaled(theme.label, scale) }], cx, cy + (stacked ? 28 : 23) * scale, "center");
   out += "</g>";
   out += text.write([
     { text: profile.activity.totalSubmissions, style: scaled(theme.averageValue, scale) },
@@ -374,13 +372,12 @@ function renderLeetCodeStats(text, theme, profile, width, height, scale, heading
   const metrics = [
     [profile.activity.activeDays, "Active Days", "Last 365 days"],
     [profile.activity.longestStreak, "Longest (365d)", "Consecutive days"],
-    [profile.activity.currentStreak, "Current Streak", "Consecutive days"],
   ];
   metrics.forEach(([value, label, description], i) => {
-    const itemX = margin + (16 + i * 111) * scale;
-    out += text.write([{ text: value, style: scaled(theme.value, scale) }], itemX, rowY + 34 * scale);
-    out += text.write([{ text: label, style: scaled(theme.label, scale) }], itemX, rowY + 50 * scale);
-    out += text.write([{ text: description, style: scaled(theme.subtext, scale) }], itemX, rowY + 66 * scale);
+    const itemX = margin + (87 + i * 174) * scale;
+    out += text.write([{ text: value, style: scaled(theme.value, scale) }], itemX, rowY + 34 * scale, "center");
+    out += text.write([{ text: label, style: scaled(theme.label, scale) }], itemX, rowY + 50 * scale, "center");
+    out += text.write([{ text: description, style: scaled(theme.subtext, scale) }], itemX, rowY + 66 * scale, "center");
   });
   return out + "</g>";
 }
@@ -412,7 +409,8 @@ export function renderSVG(days, options = {}) {
   const text = createTextWriter(profile ? LEETCODE_FONTS : FONTS);
   const summary = profile ? null : calculateStats(days);
 
-  let overlay = stats ? (profile
+  let overlay = profile ? renderLeetCodeLogo(escapeXML(theme.label.color), scale) : "";
+  overlay += stats ? (profile
     ? renderLeetCodeStats(text, theme, profile, width, height, scale, heading)
     : renderStats(text, theme, summary, width, height, scale)) : "";
 
@@ -432,7 +430,7 @@ export function renderSVG(days, options = {}) {
     ? `LeetCode isometric activity${username ? ` for @${username}` : ""}: ${profile.solved.total} solved problems`
     : `Isometric activity graph${username ? ` for @${username}` : ""}: ${summary.countTotal} contributions`;
   const description = profile
-    ? `UTC ${profile.from} to ${profile.to}. ${profile.activity.totalSubmissions} submissions, ${profile.activity.activeDays} active days. Longest streak in 365 days: ${profile.activity.longestStreak}; current streak: ${profile.activity.currentStreak}. All-time solved: ${profile.solved.total} of ${profile.available.total}. Easy: ${profile.solved.easy} of ${profile.available.easy}; Medium: ${profile.solved.medium} of ${profile.available.medium}; Hard: ${profile.solved.hard} of ${profile.available.hard}. Attempting: ${profile.attempting ?? "unavailable"}. Each ring segment shows solved / available for one difficulty. Based on Spectrewolf8's isometric renderer.`
+    ? `UTC ${profile.from} to ${profile.to}. ${profile.activity.totalSubmissions} submissions, ${profile.activity.activeDays} active days. Longest streak in 365 days: ${profile.activity.longestStreak}. All-time solved: ${profile.solved.total} of ${profile.available.total}. Easy: ${profile.solved.easy} of ${profile.available.easy}; Medium: ${profile.solved.medium} of ${profile.available.medium}; Hard: ${profile.solved.hard} of ${profile.available.hard}. Each ring segment shows solved / available for one difficulty. Based on Spectrewolf8's isometric renderer.`
     : "";
 
   return (

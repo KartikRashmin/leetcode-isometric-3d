@@ -35,17 +35,19 @@ export function validateGeneratedSvg(darkPath, lightPath, username = "KartikRash
     assert.ok(ageDays >= 0 && ageDays < 2, "Displayed window does not end on the current UTC day");
 
     const [submissions, activeDays] = numberFrom(description, /(\d+) submissions, (\d+) active days/, "activity totals");
-    const [longestStreak, currentStreak] = numberFrom(description,
-      /Longest streak in 365 days: (\d+); current streak: (\d+)/, "streaks");
+    const [longestStreak] = numberFrom(description,
+      /Longest streak in 365 days: (\d+)/, "longest streak");
     const [totalSolved, totalAvailable] = numberFrom(description,
       /All-time solved: (\d+) of (\d+)/, "all-time solved counts");
     assert.ok(totalSolved > 0 && totalSolved <= totalAvailable);
     assert.ok(submissions >= activeDays && activeDays <= 365);
-    assert.ok(currentStreak <= longestStreak && longestStreak <= activeDays);
+    assert.ok(longestStreak <= activeDays);
+    assert.doesNotMatch(description, /Attempting|current streak/i);
     assert.ok(svg.querySelector("#leetcode-solved-panel"), "Missing leetcode-solved-panel");
     assert.ok(svg.querySelector("#leetcode-activity-panel"), "Missing leetcode-activity-panel");
     assert.ok(svg.querySelector("#leetcode-solved"), "Missing solved ring section");
     assert.ok(svg.querySelector("#leetcode-activity"), "Missing activity section");
+    assert.equal(svg.querySelectorAll("#leetcode-logo path").length, 3, "Missing LeetCode logo");
     assert.equal(svg.querySelectorAll('.iso-cubes path[class^="t"]').length, 365);
 
     let difficultySum = 0;
@@ -67,7 +69,7 @@ export function validateGeneratedSvg(darkPath, lightPath, username = "KartikRash
     assert.equal(difficultySum, totalSolved);
     assert.equal(svg.querySelectorAll("script, image, foreignObject").length, 0);
     for (const node of svg.querySelectorAll("[href]")) assert.ok(node.getAttribute("href").startsWith("#"));
-    results.push({ theme, description, submissions, activeDays, longestStreak, currentStreak,
+    results.push({ theme, description, submissions, activeDays, longestStreak,
       totalSolved, totalAvailable,
       cubePaths: [...svg.querySelectorAll('.iso-cubes path[class^="t"]')]
         .map((node) => [node.getAttribute("class"), node.getAttribute("d")]),
@@ -77,7 +79,7 @@ export function validateGeneratedSvg(darkPath, lightPath, username = "KartikRash
   assert.deepEqual(results[0].cubePaths, results[1].cubePaths, "Themes disagree on graph geometry");
   return { username, totalSolved: results[0].totalSolved, totalAvailable: results[0].totalAvailable,
     submissions: results[0].submissions, activeDays: results[0].activeDays,
-    longestStreak: results[0].longestStreak, currentStreak: results[0].currentStreak };
+    longestStreak: results[0].longestStreak };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

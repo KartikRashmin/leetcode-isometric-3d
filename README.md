@@ -80,9 +80,8 @@ The Action exposes `dark-svg` and `light-svg` outputs as absolute file paths. A 
 ## What the graph shows
 
 - **Cubes:** one per UTC day in the trailing 365-day window. Cube height reflects that day's submission count; the five orange levels are chosen from active-day quartiles. Zero submissions are shown at level 0.
-- **Solved ring and totals:** all-time *distinct accepted problems* from LeetCode's public solved counts. The three ring segments are Easy, Medium, and Hard, each filled by solved divided by available questions at that difficulty.
-- **Activity panel:** submissions, active days, longest streak, and current streak within the displayed 365-day window. The current streak accepts yesterday as a one-day grace period when today has no submissions.
-- **Attempting:** public failed-but-unsolved problem count when LeetCode returns consistent progress data. If that optional field is unavailable or inconsistent, it is omitted.
+- **Solved ring and totals:** all-time *distinct accepted problems* from LeetCode's public solved counts. The three orange ring segments are Easy, Medium, and Hard, each filled by solved divided by available questions at that difficulty. Their headings use cyan, orange, and red.
+- **Activity panel:** active days and longest streak within the displayed 365-day window. The submission count appears below the solved panel.
 
 Submission totals can exceed distinct problems solved because repeated submissions count as activity. The graph's date window is calculated in UTC. Statistics and palettes are supplied by [`src/leetcode-data.js`](src/leetcode-data.js), [`src/leetcode-stats.js`](src/leetcode-stats.js), and [`src/leetcode-theme.js`](src/leetcode-theme.js); the original isometric projection and shading remain in [`src/renderer.js`](src/renderer.js) and [`src/svg-renderer.js`](src/svg-renderer.js).
 
@@ -103,3 +102,5 @@ Pushes to `feat/leetcode-isometric-mvp` run the [release validation workflow](.g
 The isometric renderer is derived from [Spectrewolf8/GitHub-Contributions-Isometric-3D-Graphs-Embed](https://github.com/Spectrewolf8/GitHub-Contributions-Isometric-3D-Graphs-Embed), and its projection uses the bundled MIT-licensed Obelisk code. The LeetCode data integration was informed by [shailesh-hacker/leetcode-calander-svg](https://github.com/shailesh-hacker/leetcode-calander-svg). This is an independent fork, not an official edition from either author or LeetCode.
 
 The repository's upstream MIT license is retained in [`LICENSE`](LICENSE). The bundled Selawik and Noto Sans Symbols fonts use SIL Open Font License 1.1; their source and license texts are documented in [`fonts/README.md`](fonts/README.md). Legacy Segoe binaries were removed before release preparation.
+
+The small logo mark is embedded from [LeetCode's official SVG asset](https://assets.leetcode.com/static_assets/public/webpack_bundles/images/logo-dark.e99485d9b.svg), with its dark stroke adapted for each theme. The LeetCode name and logo belong to LeetCode, LLC and are excluded from this repository's MIT license. This project is not affiliated with or endorsed by LeetCode.

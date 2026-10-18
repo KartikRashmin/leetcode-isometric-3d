@@ -1,7 +1,7 @@
-# M2 live LeetCode previews
+# Live LeetCode previews
 
 These SVGs are real public profile snapshots for `KartikRashmin`, fetched at
-**2026-10-18 21:04:37 UTC**. They are not synthetic examples.
+**2026-10-18 UTC**. They are not synthetic examples.
 
 | Metric | Value |
 | --- | --- |
@@ -10,11 +10,9 @@ These SVGs are real public profile snapshots for `KartikRashmin`, fetched at
 | Easy | 34 / 972 |
 | Medium | 49 / 2130 |
 | Hard | 3 / 984 |
-| Attempting | 4 |
 | Submissions in the window | 331 |
 | Active days | 78 |
 | Longest streak in the window | 54 days |
-| Current streak | 54 days |
 
 ![Dark preview](leetcode-isometric-dark.svg)
 
@@ -30,11 +28,12 @@ The new overlay shares the original panel styling and glyph writer. Its
 larger solved panel occupies the free upper-right area; the activity panel
 stays at the original lower-left anchor.
 
-The three ring segments correspond to Easy, Medium and Hard in order. Each
-segment fills by `solved / available` for that difficulty. The center shows
-the all-time total. Submissions and activity metrics refer only to the
-displayed 365 days. Unavailable Attempting data is omitted, never rendered
-as an inferred zero. The SVG title and description provide the full values.
+The three orange ring segments correspond to Easy, Medium and Hard in order.
+Each segment fills by `solved / available` for that difficulty, while the
+headings use cyan, orange and red. The center shows the all-time total.
+Submissions, active days and longest streak refer only to the displayed 365
+days. The small top-left mark uses LeetCode's official vector paths. The SVG
+title and description provide the displayed values.
 
 Selawik glyph outlines make the new SVGs self-contained. See
 [`fonts/README.md`](../../fonts/README.md) for provenance. The upstream MIT
@@ -42,9 +41,8 @@ license remains unchanged.
 
 ## Verification
 
-- `npm run test:leetcode`: 7 offline tests passed.
-- `npm run test:renderer`: 9 offline tests passed.
-- Both live SVGs parsed as XML and rendered in a browser and with node-canvas.
+- `npm test`: 29 offline tests passed.
+- Both live SVGs parsed as XML and were rasterized for visual inspection.
 - Synthetic zero activity, high activity, long headings, long usernames and
   seven-digit totals were inspected in dark and light themes.
 - Equivalent synthetic data was rendered through the unmodified upstream
@@ -54,8 +52,8 @@ license remains unchanged.
   viewBox behavior, deterministic output and rasterized panel visibility.
 - No additional npm dependencies were introduced in M2.
 
-M3 adds the reusable CLI and Action. These M2 snapshot SVGs remain unchanged;
-fresh output for any public LeetCode username is generated with
+The reusable CLI and Action generate fresh output for any public LeetCode
+username with
 `npm run generate -- --username NAME --output-dir DIR`.
 
 ## Programmatic use

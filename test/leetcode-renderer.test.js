@@ -41,6 +41,15 @@ test("dark and light themes use upstream face shading with orange palettes", () 
     }
     assert.equal(doc.querySelector('#leetcode-solved-panel').getAttribute('rx'), '8');
     assert.equal(doc.querySelector('#leetcode-solved-panel').getAttribute('stroke-width'), '2');
+    assert.equal(doc.querySelector('#leetcode-logo').querySelectorAll('path').length, 3);
+    assert.equal(doc.querySelector('#leetcode-logo path').getAttribute('fill'), '#ffa116');
+    assert.equal(doc.querySelector('#leetcode-logo path:last-child').getAttribute('fill'), theme.label.color);
+    for (const [index, difficulty] of ["easy", "medium", "hard"].entries()) {
+      const group = doc.querySelector(`[data-difficulty="${difficulty}"]`);
+      const label = difficulty[0].toUpperCase() + difficulty.slice(1);
+      assert.equal(group.querySelector(`[aria-label="${label}"]`).getAttribute("fill"), theme.difficultyLabel[index]);
+      assert.equal(group.querySelector('[data-ring="track"]').getAttribute("stroke"), theme.difficulty[index]);
+    }
   }
 });
 
@@ -48,8 +57,11 @@ test("live-model fields drive labels and ring fractions, with distinct submissio
   const doc = documentFor(renderLeetCodeSVG(profile));
   const labels = [...doc.querySelectorAll("[aria-label]")].map((n) => n.getAttribute("aria-label"));
   for (const value of [profile.solved.total, profile.activity.totalSubmissions, profile.activity.activeDays,
-    profile.activity.longestStreak, profile.activity.currentStreak]) assert.ok(labels.includes(String(value)));
-  assert.ok(labels.includes("7 Attempting"));
+    profile.activity.longestStreak]) assert.ok(labels.includes(String(value)));
+  assert.ok(labels.includes("Active Days"));
+  assert.ok(labels.includes("Longest (365d)"));
+  assert.equal(labels.includes("Current Streak"), false);
+  assert.equal(labels.some((label) => label.includes("Attempting")), false);
   for (const key of ["easy", "medium", "hard"]) {
     const progress = doc.querySelector(`[data-difficulty="${key}"] [data-ring="progress"]`);
     assert.equal(Number(progress.getAttribute("data-progress")), profile.solved[key] / profile.available[key]);
@@ -59,14 +71,13 @@ test("live-model fields drive labels and ring fractions, with distinct submissio
   assert.equal(doc.querySelector('[aria-label="86"]'), null);
 });
 
-test("zero activity and unavailable Attempting render without misleading zero or invalid arcs", () => {
+test("zero activity renders without removed metrics or invalid arcs", () => {
   const empty = profileFixture("zero");
   const svg = renderLeetCodeSVG(empty);
   const doc = documentFor(svg);
   assert.equal(doc.querySelectorAll('[data-ring="progress"]').length, 0);
   assert.equal(doc.querySelectorAll('[data-ring="track"]').length, 3);
-  assert.equal(doc.querySelector('[aria-label="0 Attempting"]'), null);
-  assert.match(doc.querySelector("desc").textContent, /Attempting: unavailable/);
+  assert.doesNotMatch(svg, /Attempting|Current Streak|current streak/);
   assert.doesNotMatch(svg, /NaN|Infinity/);
   assert.ok(layoutChart(toRendererDays(empty.days)).cubes.every((c) => c.height === 3));
 });
@@ -107,6 +118,7 @@ test("fixed input produces deterministic SVGs and responsive dimensions preserve
   assert.throws(() => renderLeetCodeSVG(profile, { width: -1 }), /dimensions/);
   const bare = documentFor(renderLeetCodeSVG(profile, { stats: false, credit: false }));
   assert.equal(bare.querySelector("#leetcode-solved"), null);
+  assert.ok(bare.querySelector("#leetcode-logo"));
   assert.equal(bare.querySelector('[aria-label="@example-mixed"]'), null);
   assert.equal(bare.querySelectorAll('.iso-cubes path[class^="t"]').length, 365);
 });
