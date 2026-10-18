@@ -16,7 +16,7 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Replace this branch ref with @v1 after the first public release.
       - uses: KartikRashmin/leetcode-isometric-3d@feat/leetcode-isometric-mvp
         with:

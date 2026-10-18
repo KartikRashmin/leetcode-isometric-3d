@@ -57,7 +57,7 @@ permissions:
   contents: read
 
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v7
   - uses: KartikRashmin/leetcode-isometric-3d@feat/leetcode-isometric-mvp
     with:
       username: YOUR_LEETCODE_USERNAME
