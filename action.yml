@@ -1,0 +1,79 @@
+name: LeetCode Isometric 3D
+description: Generate dark and light LeetCode activity SVGs from a public profile
+branding:
+  icon: activity
+  color: orange
+inputs:
+  username:
+    description: Public LeetCode username
+    required: true
+  output-dir:
+    description: Output directory relative to the caller workspace, or an absolute path
+    required: false
+    default: assets
+  width:
+    description: Display width in pixels, preserving the 5:3 canvas ratio
+    required: false
+    default: '1000'
+  height:
+    description: Display height in pixels, preserving the 5:3 canvas ratio
+    required: false
+    default: '600'
+  heading:
+    description: Solved panel heading
+    required: false
+    default: Problems Solved
+  show-stats:
+    description: Include the solved and activity statistics panels
+    required: false
+    default: 'true'
+  show-credit:
+    description: Include the LeetCode username credit
+    required: false
+    default: 'true'
+outputs:
+  dark-svg:
+    description: Absolute path to the dark SVG
+    value: ${{ steps.generate.outputs.dark-svg }}
+  light-svg:
+    description: Absolute path to the light SVG
+    value: ${{ steps.generate.outputs.light-svg }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - name: Install generator dependencies
+      shell: bash
+      run: npm ci --prefix "$GITHUB_ACTION_PATH"
+    - name: Generate SVGs
+      id: generate
+      shell: bash
+      env:
+        ACTION_USERNAME: ${{ inputs.username }}
+        ACTION_OUTPUT_DIR: ${{ inputs.output-dir }}
+        ACTION_WIDTH: ${{ inputs.width }}
+        ACTION_HEIGHT: ${{ inputs.height }}
+        ACTION_HEADING: ${{ inputs.heading }}
+        ACTION_SHOW_STATS: ${{ inputs.show-stats }}
+        ACTION_SHOW_CREDIT: ${{ inputs.show-credit }}
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE"
+        args=(--username "$ACTION_USERNAME" --output-dir "$ACTION_OUTPUT_DIR" --width "$ACTION_WIDTH" --height "$ACTION_HEIGHT" --heading "$ACTION_HEADING")
+        case "$ACTION_SHOW_STATS" in
+          true) ;;
+          false) args+=(--no-stats) ;;
+          *) echo 'show-stats must be true or false' >&2; exit 1 ;;
+        esac
+        case "$ACTION_SHOW_CREDIT" in
+          true) ;;
+          false) args+=(--no-credit) ;;
+          *) echo 'show-credit must be true or false' >&2; exit 1 ;;
+        esac
+        node "$GITHUB_ACTION_PATH/generate.js" "${args[@]}"
+        output_dir="$(node -e 'console.log(require("node:path").resolve(process.argv[1]))' "$ACTION_OUTPUT_DIR")"
+        echo "dark-svg=$output_dir/leetcode-isometric-dark.svg" >> "$GITHUB_OUTPUT"
+        echo "light-svg=$output_dir/leetcode-isometric-light.svg" >> "$GITHUB_OUTPUT"

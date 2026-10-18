@@ -14,12 +14,11 @@ import {
   precisionRound,
   sameDay,
 } from "./utils.js";
-import { GITHUB_THEME } from "./theme-config.js";
+import { DARK_THEME } from "./theme-config.js";
 
 // STYLING CONFIGURATION
-// Import different themes from theme-config.js or customize here
-// Available themes: GITHUB_THEME, DARK_THEME, LIGHT_THEME, NEON_THEME, MINIMAL_THEME, OCEAN_THEME
-let STYLE_CONFIG = { ...GITHUB_THEME };
+// Default panel style; LeetCode calls supply their theme explicitly.
+let STYLE_CONFIG = { ...DARK_THEME };
 
 /**
  * Set the default theme, used by render calls that don't pass options.theme.
@@ -45,30 +44,27 @@ export function getStyleConfig() {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fontsDir = join(__dirname, "..", "fonts");
 
-// Register Segoe UI fonts from local fonts directory
+// Use redistributable fonts for canvas output and legacy date-range arrows.
 try {
-  registerFont(join(fontsDir, "Segoe UI.ttf"), {
-    family: "Segoe UI",
+  registerFont(join(fontsDir, "Selawik-Regular.ttf"), {
+    family: "Selawik",
     weight: "normal",
   });
-  registerFont(join(fontsDir, "Segoe UI Bold.ttf"), {
-    family: "Segoe UI",
+  registerFont(join(fontsDir, "Selawik-Semibold.ttf"), {
+    family: "Selawik",
     weight: "600",
   });
-  registerFont(join(fontsDir, "Segoe UI Bold.ttf"), {
-    family: "Segoe UI",
+  registerFont(join(fontsDir, "Selawik-Semibold.ttf"), {
+    family: "Selawik",
     weight: "bold",
   });
-  // Segoe UI has no arrow glyphs (used in date ranges). Without this, each
-  // host falls back to whatever system font it has, so PNGs differ between
-  // Windows and Linux. The file is Segoe UI Symbol subset to U+2190-2193,
-  // used by fillTextWithArrows() and by the SVG renderer.
-  registerFont(join(fontsDir, "Segoe UI Symbol Arrows.ttf"), {
-    family: "Segoe UI Symbol",
+  // Selawik has no date-range arrows; use the bundled OFL Noto symbol font.
+  registerFont(join(fontsDir, "NotoSansSymbols.ttf"), {
+    family: "Noto Sans Symbols",
   });
-  console.log("✓ Registered Segoe UI fonts");
+  console.log("✓ Registered Selawik and Noto Sans Symbols fonts");
 } catch (e) {
-  console.warn("⚠ Could not register Segoe UI fonts:", e.message);
+  console.warn("⚠ Could not register fonts:", e.message);
 }
 
 // Create a browser-like environment for obelisk
@@ -722,14 +718,14 @@ function drawFlexStatItem(
     ctx.fillStyle = theme.subtext.color;
     const subtextFontSize = theme.subtext.fontSize * scale;
     const font = `${theme.subtext.fontWeight} ${subtextFontSize}px "${theme.subtext.fontFamily}", sans-serif`;
-    const arrowFont = `${subtextFontSize}px "Segoe UI Symbol", sans-serif`;
+    const arrowFont = `${subtextFontSize}px "Noto Sans Symbols", sans-serif`;
     fillTextWithArrows(ctx, subtext, x, y + 54 * scale, font, arrowFont);
   }
 }
 
 /**
- * Draw text, switching to the bundled Segoe UI Symbol face for arrows.
- * Segoe UI has no arrow glyphs and canvas would otherwise pick a fallback
+ * Draw text, switching to the bundled Noto Sans Symbols face for arrows.
+ * Selawik has no arrow glyphs and canvas would otherwise pick a fallback
  * from whatever fonts the host has installed.
  */
 function fillTextWithArrows(ctx, text, x, y, font, arrowFont) {
@@ -765,7 +761,7 @@ function drawUsernameCredit(
 
   // Discrete styling - small, subtle text with scaling
   const fontSize = 11 * scaleFactor;
-  const fontFamily = theme.subtext?.fontFamily || "Segoe UI";
+  const fontFamily = theme.subtext?.fontFamily || "Selawik";
   ctx.font = `${fontSize}px "${fontFamily}", sans-serif`;
 
   // Very subtle color with low opacity

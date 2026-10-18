@@ -1,0 +1,43 @@
+name: Refresh LeetCode isometric graphs
+
+on:
+  schedule:
+    - cron: '17 4 * * *' # Daily at 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leetcode-isometric-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Replace this branch ref with @v1 after the first public release.
+      - uses: KartikRashmin/leetcode-isometric-3d@feat/leetcode-isometric-mvp
+        with:
+          username: YOUR_LEETCODE_USERNAME
+          output-dir: assets
+      - name: Validate and commit changed SVGs
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          for theme in ('dark', 'light'):
+              path = f'assets/leetcode-isometric-{theme}.svg'
+              root = ET.parse(path).getroot()
+              assert root.tag == '{http://www.w3.org/2000/svg}svg', path
+          PY
+          git add -- assets/leetcode-isometric-dark.svg assets/leetcode-isometric-light.svg
+          if git diff --cached --quiet; then
+            echo 'LeetCode SVGs are unchanged'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'chore: refresh LeetCode isometric graphs'
+          git push

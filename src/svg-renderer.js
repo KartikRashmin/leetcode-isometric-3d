@@ -1,7 +1,7 @@
 /**
  * Isometric Contribution Graph SVG Renderer
  * Vector version of the PNG renderer. Cubes are placed by the same
- * layoutChart(), and text is drawn as Segoe UI glyph outlines, so the SVG
+ * layoutChart(), and text is drawn as bundled font glyph outlines, so the SVG
  * looks identical to the PNG on every viewer's machine without loading fonts.
  */
 
@@ -28,13 +28,12 @@ function loadFont(file) {
   );
 }
 
-// Every theme uses Segoe UI at 400 or 600, matching the fonts the PNG
-// renderer registers. Glyphs Segoe UI lacks (the arrows in date ranges) come
-// from the same Segoe UI Symbol subset the PNG renderer falls back to.
+// The legacy SVG path uses the same redistributable fonts as the PNG renderer.
+// Keep the LeetCode font set below unchanged so approved M2 SVGs stay identical.
 const FONTS = {
-  regular: loadFont("Segoe UI.ttf"),
-  bold: loadFont("Segoe UI Bold.ttf"),
-  symbol: loadFont("Segoe UI Symbol Arrows.ttf"),
+  regular: loadFont("Selawik-Regular.ttf"),
+  bold: loadFont("Selawik-Semibold.ttf"),
+  symbol: loadFont("NotoSansSymbols.ttf"),
 };
 const LEETCODE_FONTS = {
   regular: loadFont("Selawik-Regular.ttf"),
@@ -431,7 +430,7 @@ export function renderSVG(days, options = {}) {
 
   const title = profile
     ? `LeetCode isometric activity${username ? ` for @${username}` : ""}: ${profile.solved.total} solved problems`
-    : `Isometric GitHub contribution graph${username ? ` for @${username}` : ""}: ${summary.countTotal} contributions`;
+    : `Isometric activity graph${username ? ` for @${username}` : ""}: ${summary.countTotal} contributions`;
   const description = profile
     ? `UTC ${profile.from} to ${profile.to}. ${profile.activity.totalSubmissions} submissions, ${profile.activity.activeDays} active days. Longest streak in 365 days: ${profile.activity.longestStreak}; current streak: ${profile.activity.currentStreak}. All-time solved: ${profile.solved.total} of ${profile.available.total}. Easy: ${profile.solved.easy} of ${profile.available.easy}; Medium: ${profile.solved.medium} of ${profile.available.medium}; Hard: ${profile.solved.hard} of ${profile.available.hard}. Attempting: ${profile.attempting ?? "unavailable"}. Each ring segment shows solved / available for one difficulty. Based on Spectrewolf8's isometric renderer.`
     : "";

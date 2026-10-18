@@ -37,8 +37,8 @@ displayed 365 days. Unavailable Attempting data is omitted, never rendered
 as an inferred zero. The SVG title and description provide the full values.
 
 Selawik glyph outlines make the new SVGs self-contained. See
-[`fonts/README.md`](../../fonts/README.md) for provenance and the remaining
-legacy font audit work. The upstream MIT license remains unchanged.
+[`fonts/README.md`](../../fonts/README.md) for provenance. The upstream MIT
+license remains unchanged.
 
 ## Verification
 
@@ -52,10 +52,11 @@ legacy font audit work. The upstream MIT license remains unchanged.
 - Automated tests check panel clearance, canvas bounds, ring fractions,
   actual displayed values, escaping, internal-only references, responsive
   viewBox behavior, deterministic output and rasterized panel visibility.
-- No additional npm dependencies were introduced.
+- No additional npm dependencies were introduced in M2.
 
-M2 exposes a rendering function; the reusable CLI and Action are M3 work.
-The original `npm run generate` command still targets GitHub at this stage.
+M3 adds the reusable CLI and Action. These M2 snapshot SVGs remain unchanged;
+fresh output for any public LeetCode username is generated with
+`npm run generate -- --username NAME --output-dir DIR`.
 
 ## Programmatic use
 

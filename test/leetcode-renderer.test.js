@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import { createCanvas, loadImage } from "canvas";
 import { renderSVG, renderLeetCodeSVG } from "../src/svg-renderer.js";
-import { layoutChart, getCubeColor } from "../src/renderer.js";
+import { layoutChart, getCubeColor, renderWithStats } from "../src/renderer.js";
 import { toRendererDays } from "../src/leetcode-stats.js";
 import { LEETCODE_THEMES } from "../src/leetcode-theme.js";
 import { DARK_THEME } from "../src/theme-config.js";
@@ -131,4 +131,15 @@ test("large totals remain present and long headings are fitted without unsafe ma
   assert.ok(doc.querySelector('[aria-label="/ 9999999"]'));
   assert.equal(doc.querySelector('#leetcode-solved').getAttribute('aria-label'), heading);
   assert.ok([...doc.querySelectorAll('[aria-label]')].some((node) => node.getAttribute('aria-label').endsWith('…')));
+});
+
+test("retained base SVG and PNG renderers work with the licensed font replacements", () => {
+  const days = toRendererDays(profile.days);
+  const svg = renderSVG(days, { theme: DARK_THEME, stats: true });
+  const doc = documentFor(svg);
+  assert.ok(doc.querySelector('path[id^="iso-s"]'), "Noto Sans Symbols should outline date-range arrows");
+  assert.equal(doc.querySelectorAll('.iso-cubes path[class^="t"]').length, 365);
+  const canvas = renderWithStats(days, { theme: DARK_THEME });
+  assert.equal(canvas.width, 1000);
+  assert.equal(canvas.height, 600);
 });

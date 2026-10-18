@@ -1,16 +1,14 @@
-# Font provenance
+# Bundled font provenance
 
-The LeetCode SVG overlay uses **Selawik Regular and Semibold**, Microsoft's
-open source replacement for Segoe UI. The font sizes, weights and hierarchy
-follow the original renderer; the SVG embeds only the glyph outlines it uses.
+The SVG renderer converts only used glyphs to vector paths. These font files
+are retained for generating new images; the SVGs do not load external fonts.
 
-- Source: https://github.com/microsoft/Selawik/releases/tag/1.01
-- Archive: `Selawik_Release.zip`
-- `selawk.ttf` is stored unmodified as `Selawik-Regular.ttf`.
-- `selawksb.ttf` is stored unmodified as `Selawik-Semibold.ttf`.
-- License: SIL Open Font License 1.1; see `Selawik-LICENSE.txt`.
+| File | Source | License |
+| --- | --- | --- |
+| `Selawik-Regular.ttf`, `Selawik-Semibold.ttf` | [Microsoft Selawik 1.01](https://github.com/microsoft/Selawik/releases/tag/1.01), `selawk.ttf` and `selawksb.ttf`, unmodified | SIL Open Font License 1.1, [`Selawik-LICENSE.txt`](Selawik-LICENSE.txt) |
+| `NotoSansSymbols.ttf` | [Noto Sans Symbols](https://github.com/notofonts/symbols), unmodified system-distributed variable font | SIL Open Font License 1.1, [`NotoSansSymbols-LICENSE.txt`](NotoSansSymbols-LICENSE.txt) |
 
-The three pre-existing Segoe UI files are used only by the legacy GitHub
-renderer. The upstream checkout includes no redistribution notice for them.
-They are not used for the LeetCode SVG glyphs. Their replacement and legacy
-renderer cleanup remain part of the M3 font/license audit before release.
+Selawik retains the M2 LeetCode typography. Noto Sans Symbols supplies arrows
+for the retained base renderer's date ranges. The Segoe UI binaries from the
+original checkout were removed because their redistribution terms were not
+documented.
