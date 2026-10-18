@@ -39,9 +39,9 @@ permission only when their own workflow commits generated assets.
 - Live generation and XML/statistics validation for both SVG themes
 - Generated SVG artifact upload for visual review
 
-## Tag plan
+## Documentation
 
-After the release pull request is approved and merged into `main`, create
-`v1.0.0` at the approved merge commit and create or update `v1` to the same
-commit. Publish the GitHub release with the title **LeetCode Isometric 3D
-v1.0.0** and these notes. Both tags must point to approved code on `main`.
+The [README](README.md) covers setup and CLI use. The [profile README guide](docs/PROFILE_README.md)
+walks through scheduled updates, first generation, theme-aware embedding,
+customization, and common errors. Third-party credits and license details are
+in [NOTICE.md](NOTICE.md).
