@@ -1,9 +1,13 @@
-name: Feature branch release validation
+name: Release validation
 
 on:
   push:
     branches:
+      - main
       - feat/leetcode-isometric-mvp
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read

@@ -2,6 +2,8 @@
 
 Generate a 365-day LeetCode activity graph as self-contained dark and light SVGs. The diagonal cubes, face shading, panel shapes, and 1000 × 600 composition come from [Spectrewolf8's isometric contribution renderer](https://github.com/Spectrewolf8/GitHub-Contributions-Isometric-3D-Graphs-Embed). This edition uses public LeetCode data, orange and brown activity colors, a solved-problems ring, and LeetCode statistics.
 
+See the [`v1.0.0` release notes](RELEASE_NOTES.md) for the first public release.
+
 | Dark | Light |
 | --- | --- |
 | ![Dark LeetCode isometric preview](media/leetcode/leetcode-isometric-dark.svg) | ![Light LeetCode isometric preview](media/leetcode/leetcode-isometric-light.svg) |
@@ -58,13 +60,13 @@ permissions:
 
 steps:
   - uses: actions/checkout@v7
-  - uses: KartikRashmin/leetcode-isometric-3d@feat/leetcode-isometric-mvp
+  - uses: KartikRashmin/leetcode-isometric-3d@v1
     with:
       username: YOUR_LEETCODE_USERNAME
       output-dir: assets
 ```
 
-The feature branch ref above is available before the first release. Switch to `@v1` after that tag is actually published; no release tag is created by this project milestone. The Action itself needs only read access; the example below grants `contents: write` because it commits SVGs. For a full scheduled workflow, copy [`examples/workflows/update-leetcode.yml`](examples/workflows/update-leetcode.yml) to **your own repository's** `.github/workflows/update-leetcode.yml`, replace the username, and adjust `output-dir` and README paths. Scheduled workflows run from the caller repository's default branch, and protected branches may require a PR instead of the example's direct push.
+`@v1` is the stable major Action reference and will track compatible v1 releases. The Action itself needs only read access; the example below grants `contents: write` because it commits SVGs. For a full scheduled workflow, copy [`examples/workflows/update-leetcode.yml`](examples/workflows/update-leetcode.yml) to **your own repository's** `.github/workflows/update-leetcode.yml`, replace the username, and adjust `output-dir` and README paths. Scheduled workflows run from the caller repository's default branch, and protected branches may require a PR instead of the example's direct push.
 
 | Action input | Default | Purpose |
 | --- | --- | --- |
@@ -81,7 +83,7 @@ The Action exposes `dark-svg` and `light-svg` outputs as absolute file paths. A 
 
 - **Cubes:** one per UTC day in the trailing 365-day window. Cube height reflects that day's submission count; the five orange levels are chosen from active-day quartiles. Zero submissions are shown at level 0.
 - **Solved ring and totals:** all-time *distinct accepted problems* from LeetCode's public solved counts. The three orange ring segments are Easy, Medium, and Hard, each filled by solved divided by available questions at that difficulty. Their headings use cyan, orange, and red.
-- **Activity panel:** active days and longest streak within the displayed 365-day window. The submission count appears below the solved panel.
+- **Activity panel:** Active Days and Max Streak within the displayed 365-day window. The submission count appears below the solved panel.
 
 Submission totals can exceed distinct problems solved because repeated submissions count as activity. The graph's date window is calculated in UTC. Statistics and palettes are supplied by [`src/leetcode-data.js`](src/leetcode-data.js), [`src/leetcode-stats.js`](src/leetcode-stats.js), and [`src/leetcode-theme.js`](src/leetcode-theme.js); the original isometric projection and shading remain in [`src/renderer.js`](src/renderer.js) and [`src/svg-renderer.js`](src/svg-renderer.js).
 
@@ -93,9 +95,9 @@ npm test
 npm audit
 ```
 
-The offline tests cover LeetCode parsing, UTC activity and streaks, unchanged cube geometry, SVG panel rendering, CLI error handling, multiple usernames, and the composite Action's actual generation step. A live CLI run needs LeetCode availability and may be rate limited; on a failure, the previous good assets remain available. The project currently ships a CLI and Action, not a hosted API. First public release still requires an owner review of the generated images and a release tag.
+The offline tests cover LeetCode parsing, UTC activity and streaks, unchanged cube geometry, SVG panel rendering, CLI error handling, multiple usernames, and the composite Action's actual generation step. A live CLI run needs LeetCode availability and may be rate limited; on a failure, the previous good assets remain available. The project ships a CLI and Action, not a hosted API.
 
-Pushes to `feat/leetcode-isometric-mvp` run the [release validation workflow](.github/workflows/ci.yml) on a GitHub-hosted runner. It checks dependencies and offline tests, calls the Action with `uses: ./`, verifies live SVG statistics and visual elements, and uploads both themes as a downloadable artifact for review.
+Pushes to `main` and `feat/leetcode-isometric-mvp`, plus pull requests targeting `main`, run the [release validation workflow](.github/workflows/ci.yml) on a GitHub-hosted runner. It checks dependencies and offline tests, calls the Action with `uses: ./`, verifies live SVG statistics and visual elements, and uploads both themes as a downloadable artifact for review.
 
 ## Attribution and licenses
 
@@ -104,3 +106,5 @@ The isometric renderer is derived from [Spectrewolf8/GitHub-Contributions-Isomet
 The repository's upstream MIT license is retained in [`LICENSE`](LICENSE). The bundled Selawik and Noto Sans Symbols fonts use SIL Open Font License 1.1; their source and license texts are documented in [`fonts/README.md`](fonts/README.md). Legacy Segoe binaries were removed before release preparation.
 
 The small logo mark is embedded from [LeetCode's official SVG asset](https://assets.leetcode.com/static_assets/public/webpack_bundles/images/logo-dark.e99485d9b.svg), with its dark stroke adapted for each theme. The LeetCode name and logo belong to LeetCode, LLC and are excluded from this repository's MIT license. This project is not affiliated with or endorsed by LeetCode.
+
+See [`NOTICE.md`](NOTICE.md) for consolidated third-party attribution and trademark notices.

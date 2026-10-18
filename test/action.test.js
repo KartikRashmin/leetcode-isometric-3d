@@ -28,21 +28,25 @@ test("composite Action metadata maps public inputs to the CLI and exposes both o
 
 test("example workflow schedules safe refreshes and commits only changed SVGs", async () => {
   const workflow = YAML.parse(await readFile(join(root, "examples/workflows/update-leetcode.yml"), "utf8"));
+  const readme = await readFile(join(root, "README.md"), "utf8");
   assert.ok(workflow.on.schedule[0].cron);
   assert.ok(Object.hasOwn(workflow.on, "workflow_dispatch"));
   assert.equal(workflow.permissions.contents, "write");
   const steps = workflow.jobs.refresh.steps;
   assert.ok(steps.some((step) => step.uses?.startsWith("actions/checkout@")));
-  assert.ok(steps.some((step) => step.uses === "KartikRashmin/leetcode-isometric-3d@feat/leetcode-isometric-mvp"));
+  assert.ok(steps.some((step) => step.uses === "KartikRashmin/leetcode-isometric-3d@v1"));
+  assert.match(readme, /KartikRashmin\/leetcode-isometric-3d@v1/);
+  assert.doesNotMatch(readme, /KartikRashmin\/leetcode-isometric-3d@feat\/leetcode-isometric-mvp/);
   const script = steps.at(-1).run;
   assert.match(script, /ET\.parse\(path\)/);
   assert.match(script, /git diff --cached --quiet/);
   assert.match(script, /git add -- assets\/leetcode-isometric-dark\.svg assets\/leetcode-isometric-light\.svg/);
 });
 
-test("feature branch CI uses the Action on a hosted runner and uploads validated SVGs", async () => {
+test("release CI covers main, its pull requests and the feature branch", async () => {
   const workflow = YAML.parse(await readFile(join(root, ".github/workflows/ci.yml"), "utf8"));
-  assert.deepEqual(workflow.on.push.branches, ["feat/leetcode-isometric-mvp"]);
+  assert.deepEqual(workflow.on.push.branches, ["main", "feat/leetcode-isometric-mvp"]);
+  assert.deepEqual(workflow.on.pull_request.branches, ["main"]);
   assert.equal(workflow.permissions.contents, "read");
   const job = workflow.jobs.validate;
   assert.equal(job["runs-on"], "ubuntu-latest");
@@ -59,6 +63,15 @@ test("feature branch CI uses the Action on a hosted runner and uploads validated
   assert.equal(upload.with["if-no-files-found"], "error");
   assert.match(upload.with.path, /leetcode-isometric-dark\.svg/);
   assert.match(upload.with.path, /leetcode-isometric-light\.svg/);
+});
+
+test("v1 package metadata identifies the public repository without enabling npm publication", async () => {
+  const pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+  assert.equal(pkg.version, "1.0.0");
+  assert.equal(pkg.private, true);
+  assert.equal(pkg.license, "MIT");
+  assert.equal(pkg.repository.url, "git+https://github.com/KartikRashmin/leetcode-isometric-3d.git");
+  assert.equal(pkg.homepage, "https://github.com/KartikRashmin/leetcode-isometric-3d#readme");
 });
 
 test("Action generation step runs in a caller workspace with two verified SVG outputs", async () => {

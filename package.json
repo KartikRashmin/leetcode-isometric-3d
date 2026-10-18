@@ -1,9 +1,17 @@
 {
   "name": "leetcode-isometric-3d",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Generate LeetCode isometric activity graphs as dark and light SVGs",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KartikRashmin/leetcode-isometric-3d.git"
+  },
+  "homepage": "https://github.com/KartikRashmin/leetcode-isometric-3d#readme",
+  "bugs": {
+    "url": "https://github.com/KartikRashmin/leetcode-isometric-3d/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.0"

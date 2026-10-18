@@ -41,7 +41,7 @@ license remains unchanged.
 
 ## Verification
 
-- `npm test`: 29 offline tests passed.
+- `npm test`: 30 offline tests passed.
 - Both live SVGs parsed as XML and were rasterized for visual inspection.
 - Synthetic zero activity, high activity, long headings, long usernames and
   seven-digit totals were inspected in dark and light themes.

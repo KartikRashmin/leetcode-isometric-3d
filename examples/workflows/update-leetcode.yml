@@ -17,8 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # Replace this branch ref with @v1 after the first public release.
-      - uses: KartikRashmin/leetcode-isometric-3d@feat/leetcode-isometric-mvp
+      - uses: KartikRashmin/leetcode-isometric-3d@v1
         with:
           username: YOUR_LEETCODE_USERNAME
           output-dir: assets
