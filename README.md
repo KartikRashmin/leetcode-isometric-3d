@@ -54,7 +54,7 @@ This repository's [`action.yml`](action.yml) is a composite Action. It installs 
 
 ```yaml
 permissions:
-  contents: write # Needed only if your workflow commits generated assets
+  contents: read
 
 steps:
   - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ steps:
       output-dir: assets
 ```
 
-The feature branch ref above is available before the first release. Switch to `@v1` after that tag is actually published; no release tag is created by this project milestone. For a full scheduled workflow, copy [`examples/workflows/update-leetcode.yml`](examples/workflows/update-leetcode.yml) to **your own repository's** `.github/workflows/update-leetcode.yml`, replace the username, and adjust `output-dir` and README paths. Scheduled workflows run from the caller repository's default branch, and protected branches may require a PR instead of the example's direct push.
+The feature branch ref above is available before the first release. Switch to `@v1` after that tag is actually published; no release tag is created by this project milestone. The Action itself needs only read access; the example below grants `contents: write` because it commits SVGs. For a full scheduled workflow, copy [`examples/workflows/update-leetcode.yml`](examples/workflows/update-leetcode.yml) to **your own repository's** `.github/workflows/update-leetcode.yml`, replace the username, and adjust `output-dir` and README paths. Scheduled workflows run from the caller repository's default branch, and protected branches may require a PR instead of the example's direct push.
 
 | Action input | Default | Purpose |
 | --- | --- | --- |
@@ -95,6 +95,8 @@ npm audit
 ```
 
 The offline tests cover LeetCode parsing, UTC activity and streaks, unchanged cube geometry, SVG panel rendering, CLI error handling, multiple usernames, and the composite Action's actual generation step. A live CLI run needs LeetCode availability and may be rate limited; on a failure, the previous good assets remain available. The project currently ships a CLI and Action, not a hosted API. First public release still requires an owner review of the generated images and a release tag.
+
+Pushes to `feat/leetcode-isometric-mvp` run the [release validation workflow](.github/workflows/ci.yml) on a GitHub-hosted runner. It checks dependencies and offline tests, calls the Action with `uses: ./`, verifies live SVG statistics and visual elements, and uploads both themes as a downloadable artifact for review.
 
 ## Attribution and licenses
 

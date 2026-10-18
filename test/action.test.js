@@ -40,6 +40,27 @@ test("example workflow schedules safe refreshes and commits only changed SVGs", 
   assert.match(script, /git add -- assets\/leetcode-isometric-dark\.svg assets\/leetcode-isometric-light\.svg/);
 });
 
+test("feature branch CI uses the Action on a hosted runner and uploads validated SVGs", async () => {
+  const workflow = YAML.parse(await readFile(join(root, ".github/workflows/ci.yml"), "utf8"));
+  assert.deepEqual(workflow.on.push.branches, ["feat/leetcode-isometric-mvp"]);
+  assert.equal(workflow.permissions.contents, "read");
+  const job = workflow.jobs.validate;
+  assert.equal(job["runs-on"], "ubuntu-latest");
+  const steps = job.steps;
+  assert.ok(steps.some((step) => step.uses?.startsWith("actions/checkout@")));
+  assert.ok(steps.some((step) => step.uses?.startsWith("actions/setup-node@") &&
+    step.with["node-version"] === "24"));
+  assert.ok(steps.some((step) => step.run === "npm ci"));
+  assert.ok(steps.some((step) => step.run === "npm test"));
+  assert.ok(steps.some((step) => step.run === "npm audit --audit-level=high"));
+  assert.ok(steps.some((step) => step.uses === "./" && step.with.username === "KartikRashmin"));
+  assert.ok(steps.some((step) => step.run?.includes("scripts/validate-generated-svg.js")));
+  const upload = steps.find((step) => step.uses?.startsWith("actions/upload-artifact@"));
+  assert.equal(upload.with["if-no-files-found"], "error");
+  assert.match(upload.with.path, /leetcode-isometric-dark\.svg/);
+  assert.match(upload.with.path, /leetcode-isometric-light\.svg/);
+});
+
 test("Action generation step runs in a caller workspace with two verified SVG outputs", async () => {
   const action = YAML.parse(await readFile(join(root, "action.yml"), "utf8"));
   const script = action.runs.steps.find((step) => step.id === "generate").run;

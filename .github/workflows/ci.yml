@@ -1,0 +1,46 @@
+name: Feature branch release validation
+
+on:
+  push:
+    branches:
+      - feat/leetcode-isometric-mvp
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run offline tests
+        run: npm test
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Generate live LeetCode SVGs through the composite Action
+        id: generate
+        uses: ./
+        with:
+          username: KartikRashmin
+          output-dir: artifacts/leetcode
+      - name: Validate generated SVGs
+        env:
+          DARK_SVG: ${{ steps.generate.outputs.dark-svg }}
+          LIGHT_SVG: ${{ steps.generate.outputs.light-svg }}
+        run: node scripts/validate-generated-svg.js "$DARK_SVG" "$LIGHT_SVG"
+      - name: Upload SVG previews
+        if: ${{ always() && steps.generate.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: leetcode-isometric-previews
+          path: |
+            artifacts/leetcode/leetcode-isometric-dark.svg
+            artifacts/leetcode/leetcode-isometric-light.svg
+          if-no-files-found: error
+          retention-days: 14
